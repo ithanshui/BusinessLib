@@ -32,7 +32,7 @@ namespace Template
     public class DataConnection : BusinessLib.Data.LinqToDBConnection<Entitys>
     {
         readonly static IDataProvider provider = new LinqToDB.DataProvider.SqlServer.SqlServerDataProvider(System.String.Empty, LinqToDB.DataProvider.SqlServer.SqlServerVersion.v2008);
-        const string conString = "Server=localhost;User Id=sa;Password=xl4313461;Database=BusinessLib;";
+        const string conString = "Server=localhost;User Id=sa;Password=test;Database=BusinessLib;";
 
         public DataConnection()
             : base(provider, conString) { entity = new Entitys(this); }
@@ -439,7 +439,7 @@ namespace Template
         {
             var path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\Entity");
 
-            using (var con = CommonData.ADO.SqlHelp.GetConnection(CommonData.ADO.DataBaseType.SqlServer, "Server=localhost;User Id=sa;Password=xl4313461;Database=BusinessLib;"))
+            using (var con = CommonData.ADO.SqlHelp.GetConnection(CommonData.ADO.DataBaseType.SqlServer, "Server=localhost;User Id=sa;Password=test;Database=BusinessLib;"))
             {
                 using (var dt = CommonData.ADO.SqlHelp.ExecuteTable(con, "SELECT id,name FROM sysobjects WHERE xtype='U'AND name<>'dtproperties' AND name <> 'SysAccount' AND name <> 'SysAccount_Role' AND name <> 'SysCompetence' AND name <> 'SysConfig' AND name <> 'SysLog' AND name <> 'SysLogin' AND name <> 'SysRole' AND name <> 'SysRole_Competence' order by name"))
                 {
@@ -488,7 +488,7 @@ namespace Template
         static string GetToken()
         {
             var error = System.String.Empty;
-            var session = new BusinessLib.BasicAuthentication.Session { Account = "admin", Password = "xlievo11", IP = "192.168", Site = "Site" }.ToString();
+            var session = new BusinessLib.BasicAuthentication.Session { Account = "admin", Password = "test", IP = "192.168", Site = "Site" }.ToString();
             var sss = Common.Interceptor.Instance.Login(session, out error);
             if (null != sss) { }
             var token = new BusinessLib.BasicAuthentication.Token { Key = sss, IP = "192.168" }.ToString();
