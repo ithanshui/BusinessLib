@@ -59,13 +59,13 @@ namespace BusinessLib.BasicAuthentication
             var competences = cache.Get<System.Collections.Generic.List<Entity.SysCompetence>>(mark);
             switch (session.Site)
             {
-                case "0"://系统人员
+                case "0"://SYS
                     if (null == session.RoleCompetence.Roles //null
                     ||
                     null == session.RoleCompetence.CompetenceAll
                     ||
-                    (competences.Exists(c => competence.Equals(c.competence)) //存在于系统权限列表
-                && !session.RoleCompetence.CompetenceAll.Exists(c => competence.Equals(c.Competence))))//判断个人权限
+                    (competences.Exists(c => competence.Equals(c.competence)) //exist
+                && !session.RoleCompetence.CompetenceAll.Exists(c => competence.Equals(c.Competence))))//check
                     {
                         error = ResultExtensions.Result(MarkEnum.Exp_CompetenceIllegal);
                         return false;
