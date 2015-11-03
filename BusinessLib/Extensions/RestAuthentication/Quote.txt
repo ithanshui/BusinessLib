@@ -1,0 +1,6 @@
+﻿http://www.codeproject.com/Articles/149738/Basic-Authentication-on-a-WCF-REST-Service
+System.Web
+System.Web.ApplicationServices
+Microsoft.ServiceModel.Web
+System.ServiceModel.Activation
+System.ServiceModel.Web

@@ -1,0 +1,44 @@
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\BLLib.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\BLLib.pdb
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Castle.Core.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Common.Data.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Newtonsoft.Json.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Ninject.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.DynamicProxy.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Castle.Core.xml
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Ninject.xml
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.xml
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.DynamicProxy.xml
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\obj\Debug\BLLib.csprojResolveAssemblyReference.cache
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\obj\Debug\BLLib.dll
+D:\My Documents\桌面\我的文档\Visual Studio 2012\Projects\BLNew\BLLib\obj\Debug\BLLib.pdb
+E:\Projects\BLNew\BLLib\bin\BLLib.dll
+E:\Projects\BLNew\BLLib\bin\BLLib.pdb
+E:\Projects\BLNew\BLLib\bin\Castle.Core.dll
+E:\Projects\BLNew\BLLib\bin\Common.Data.dll
+E:\Projects\BLNew\BLLib\bin\Newtonsoft.Json.dll
+E:\Projects\BLNew\BLLib\bin\Ninject.dll
+E:\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.dll
+E:\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.DynamicProxy.dll
+E:\Projects\BLNew\BLLib\bin\Castle.Core.xml
+E:\Projects\BLNew\BLLib\bin\Ninject.xml
+E:\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.xml
+E:\Projects\BLNew\BLLib\bin\Ninject.Extensions.Interception.DynamicProxy.xml
+E:\Projects\BLNew\BLLib\obj\Debug\BLLib.dll
+E:\Projects\BLNew\BLLib\obj\Debug\BLLib.pdb
+E:\Projects\ServiceArchitecture\BLLib\bin\BLLib.dll
+E:\Projects\ServiceArchitecture\BLLib\bin\BLLib.pdb
+E:\Projects\ServiceArchitecture\BLLib\bin\Castle.Core.dll
+E:\Projects\ServiceArchitecture\BLLib\bin\Common.Data.dll
+E:\Projects\ServiceArchitecture\BLLib\bin\Newtonsoft.Json.dll
+E:\Projects\ServiceArchitecture\BLLib\bin\Ninject.dll
+E:\Projects\ServiceArchitecture\BLLib\bin\Ninject.Extensions.Interception.dll
+E:\Projects\ServiceArchitecture\BLLib\bin\Ninject.Extensions.Interception.DynamicProxy.dll
+E:\Projects\ServiceArchitecture\BLLib\bin\Castle.Core.xml
+E:\Projects\ServiceArchitecture\BLLib\bin\Ninject.xml
+E:\Projects\ServiceArchitecture\BLLib\bin\Ninject.Extensions.Interception.xml
+E:\Projects\ServiceArchitecture\BLLib\bin\Ninject.Extensions.Interception.DynamicProxy.xml
+E:\Projects\ServiceArchitecture\BLLib\obj\Debug\BLLib.dll
+E:\Projects\ServiceArchitecture\BLLib\obj\Debug\BLLib.pdb
+E:\Projects\ServiceArchitecture\BLLib\obj\Debug\BLLib.csprojResolveAssemblyReference.cache
