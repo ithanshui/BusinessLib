@@ -2,37 +2,25 @@
 
 # This is a Server framework
 
-public abstract class DataBase<IConnection> : IData, IData2 where IConnection : class, BusinessLib.Data.IConnection
+    public abstract class DataBase<IConnection> : IData, IData2 where IConnection : class, BusinessLib.Data.IConnection
 
 //write data
 
-using (var con = this.DB.GetConnection())
-
-{
-
-  con.BeginTransaction();
-  
-
-  member[0].loginIp = _ip;
-  
-  member[0].loginDtt = time;
-  
-  if (1 == result) { member[0].errorCount = 0; }
-  
-  if (0 == con.Update(member[0])) { con.Rollback(); throw new System.Data.DBConcurrencyException(typeof(SysAccount).Name); }
-  
-  if (-2 != result)//freeze
-  
+  using (var con = this.DB.GetConnection())
   {
-  
-    if (0 == con.Save(new SysLogin { category = 0, session = session, account = _account1, ip = _ip, data = _data, result =         result, describe = _error, dtt = time })) { con.Rollback(); throw new
-    
-    System.Data.DBConcurrencyException(typeof(SysLogin).Name); }
+    con.BeginTransaction();
+
+    member[0].loginIp = _ip;
+    member[0].loginDtt = time;
+    if (1 == result) { member[0].errorCount = 0; }
+    if (0 == con.Update(member[0])) { con.Rollback(); throw new System.Data.DBConcurrencyException(typeof(SysAccount).Name); }
+    if (-2 != result)//freeze
+    {
+      if (0 == con.Save(new SysLogin { category = 0, session = session, account = _account1, ip = _ip, data = _data, result =         result, describe = _error, dtt = time })) { con.Rollback(); throw new System.Data.DBConcurrencyException(typeof(SysLogin).Name); }
     
   }
-  
+
   con.Commit();
-  
 }
 
 
