@@ -3,7 +3,9 @@
 # This is a Server framework
 
     public abstract class DataBase<IConnection> : IData, IData2 where IConnection : class, BusinessLib.Data.IConnection
-
+    public class LogBase : ILog
+    public class CacheBase : ICache, IDictionary<string, object, KeyValuePair<string, object>>, IEnumerable<KeyValuePair<string, object>>, IEnumerable
+    
 //write data
 
     using (var con = this.DB.GetConnection())
