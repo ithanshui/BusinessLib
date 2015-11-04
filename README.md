@@ -1,5 +1,7 @@
 # BusinessLib
 
+# NuGet:https://www.nuget.org/packages/BusinessLib/
+
 # This is a Server framework
 
     public abstract class DataBase<IConnection> : IData, IData2 where IConnection : class, BusinessLib.Data.IConnection
