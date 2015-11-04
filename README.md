@@ -1,6 +1,6 @@
 # BusinessLib
 
-# NuGet:https://www.nuget.org/packages/BusinessLib/
+NuGet:https://www.nuget.org/packages/BusinessLib/
 
 # This is a Server framework
 
