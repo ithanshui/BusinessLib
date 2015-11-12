@@ -56,9 +56,9 @@ namespace BusinessLib.Business
                     case "0":
                         #region ^^^^^^^^^^^^^^^
 
-                        var errorCount = MarkBase.GetObject<int>(MarkEnum.Login_ErrorCount);// 3 次数
-                        var errorRange = MarkBase.GetObject<int>(MarkEnum.Login_ErrorRange);// 2 分钟
-                        var errorFreeze = MarkBase.GetObject<int>(MarkEnum.Login_ErrorFreeze);// 3 分钟
+                        var errorCount = MarkBase.GetObject<int>(MarkEnum.Login_ErrorCount);// 3 number
+                        var errorRange = MarkBase.GetObject<int>(MarkEnum.Login_ErrorRange);// 2 minute
+                        var errorFreeze = MarkBase.GetObject<int>(MarkEnum.Login_ErrorFreeze);// 3 minute
                         var strFreeze = string.Format("{0}{1} Minutes", MarkBase.GetObject<string>(MarkEnum.Exp_UserFrozen), errorFreeze);
                         var result = -99;
 
@@ -74,14 +74,14 @@ namespace BusinessLib.Business
                                     if (0 < sysLogin.Count && -1 == sysLogin[0].result && 0 > time.CompareTo(sysLogin[0].dtt.AddMinutes(errorFreeze)))
                                     {
                                         error = strFreeze;
-                                        result = -2;//冻结中
+                                        result = -2;//freeze ing...
                                         break;
                                     }
 
                                     if (!System.Object.Equals(sysAccount[0].password, session.Password) || !System.Object.Equals(sysAccount[0].securityCode, session.SecurityCode))
                                     {
                                         error = MarkBase.GetObject<string>(MarkEnum.Exp_PasswordError);
-                                        result = 0;//密码错误
+                                        result = 0;//password error
 
                                         var c = sysLogin.FindIndex(l => 0 != l.result);
                                         var range = sysLogin.Take(-1 == c ? sysLogin.Count : c);
@@ -90,12 +90,12 @@ namespace BusinessLib.Business
                                         if ((errorCount - 1) == c)
                                         {
                                             error = strFreeze;
-                                            result = -1;//准备冻结
+                                            result = -1;//ready freeze
                                         }
                                     }
                                     else
                                     {
-                                        result = 1;//成功
+                                        result = 1;//OK
 
                                         session.RoleCompetence = GetRoleCompetence(cache, sysAccount[0].parent, sysAccount[0].gid, sysAccount[0].account);
                                     }
@@ -105,14 +105,13 @@ namespace BusinessLib.Business
                             //write data
                             if (1 == sysAccount.Count)
                             {
-                                //数据操作示例
                                 con.BeginTransaction();
 
                                 sysAccount[0].loginIp = session.IP;
                                 sysAccount[0].loginDtt = time;
                                 if (1 == result) { sysAccount[0].errorCount = 0; }
                                 if (0 == con.Update(sysAccount[0])) { con.Rollback(); throw new System.Data.DBConcurrencyException(typeof(SysAccount).Name); }
-                                if (-2 != result)//冻结中
+                                if (-2 != result)//freeze ing...
                                 {
                                     if (0 == con.Save(new SysLogin { category = 0, session = session.Key, account = session.Account, ip = session.IP, data = data, result = result, describe = error, dtt = time })) { con.Rollback(); throw new System.Data.DBConcurrencyException(typeof(SysLogin).Name); }
                                 }
@@ -174,13 +173,13 @@ namespace BusinessLib.Business
             }
         }
 
-        public static string Logout(string token, BusinessLib.Cache.ICache cache)
+        public static Result.IResult Logout(string token, BusinessLib.Cache.ICache cache)
         {
             var _token = token.GetToken();
-            if (null == _token) { return ResultExtensions.Result(MarkEnum.Exp_SessionIllegal).ToString(); }
+            if (null == _token) { return ResultExtensions.Result(MarkEnum.Exp_SessionIllegal); }
 
             cache.Remove(_token.Key);
-            return ResultExtensions.Result("OK").ToString();
+            return ResultExtensions.Result("OK");
         }
 
         public static BusinessLib.BasicAuthentication.ITokenNot GetTokenNot(this string token)
@@ -228,22 +227,6 @@ namespace BusinessLib.Business
         public static void SetSession(this BusinessLib.Cache.ICache cache, BusinessLib.BasicAuthentication.ISession session)
         {
             cache.Set(session.Key, session, TimeSpan.FromMinutes(MarkBase.GetObject<int>(MarkEnum.OutTime_Session_Time)));
-        }
-
-        public static void UpdateRoleCompetence(this BusinessLib.BasicAuthentication.ISession session, BusinessLib.Cache.ICache cache)
-        {
-            session.RoleCompetence = GetRoleCompetence(cache, session.RoleCompetence.Account.Parent, session.RoleCompetence.Account.Key, session.RoleCompetence.Account.Account);
-            cache.SetSession(session);
-
-            if (null == session.RoleCompetence.AccountAll) { return; }
-
-            foreach (var item in cache.Where(c => c.Key.StartsWith("Session_") && session.RoleCompetence.Account.Key == ((BusinessLib.BasicAuthentication.ISession)c.Value).RoleCompetence.Account.Parent))
-            {
-                if (!default(System.Collections.Generic.KeyValuePair<string, object>).Equals(item))
-                {
-                    ((BusinessLib.BasicAuthentication.ISession)item.Value).UpdateRoleCompetence(cache);
-                }
-            }
         }
 
         public static BusinessLib.BasicAuthentication.IToken GetToken(string value, string ip)
@@ -538,6 +521,22 @@ GROUP BY Competence.competence
                             competence_describe = _competence.describe,
                         };
             return query.ToList();
+        }
+
+        public static void UpdateRoleCompetence(this BusinessLib.BasicAuthentication.ISession session, BusinessLib.Cache.ICache cache)
+        {
+            session.RoleCompetence = GetRoleCompetence(cache, session.RoleCompetence.Account.Parent, session.RoleCompetence.Account.Key, session.RoleCompetence.Account.Account);
+            cache.SetSession(session);
+
+            if (null == session.RoleCompetence.AccountAll) { return; }
+
+            foreach (var item in cache.Where(c => c.Key.StartsWith("Session_") && session.RoleCompetence.Account.Key == ((BusinessLib.BasicAuthentication.ISession)c.Value).RoleCompetence.Account.Parent))
+            {
+                if (!default(System.Collections.Generic.KeyValuePair<string, object>).Equals(item))
+                {
+                    ((BusinessLib.BasicAuthentication.ISession)item.Value).UpdateRoleCompetence(cache);
+                }
+            }
         }
 
         #endregion

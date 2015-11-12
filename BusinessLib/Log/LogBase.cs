@@ -3,6 +3,7 @@ using BusinessLib.Entity;
 
 namespace BusinessLib.Log
 {
+    /*
     public class LogBase<IData, ICache> : LogBase
         where IData : class, BusinessLib.Data.IData, new()
         where ICache : class, BusinessLib.Cache.ICache, new()
@@ -59,7 +60,7 @@ namespace BusinessLib.Log
             //Mail.Send(member, content, "test@test.com", string.Format("Exception {0}", member), "smtp.live.com", "xlievo@live.com", "password", port: 587, enableSsl: true, to: "test@test.com");
         }
     }
-
+    */
     public class LogBase : BusinessLib.Log.ILog
     {
         //System.IObservable<string> dd;

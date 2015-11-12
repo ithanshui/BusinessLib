@@ -1,4 +1,5 @@
-﻿using BusinessLib.Entity;
+﻿using BusinessLib.Attributes;
+using BusinessLib.Entity;
 using BusinessLib.Mark;
 using System;
 using System.Linq;
@@ -26,12 +27,14 @@ namespace BusinessLib.Business
             get { return isRoleCompetence; }
             set
             {
+                var _value = value;
+
                 if (null == db || null == cache) { return; }
 
-                if (isRoleCompetence == value) { return; }
+                if (isRoleCompetence == _value) { return; }
 
                 var mark = MarkBase.GetObject<string>(MarkEnum.Sys_Action);
-                if (value)
+                if (_value)
                 {
                     if (0 == TimerActions.Count(m => mark == m.Item1))
                     {
@@ -59,7 +62,7 @@ namespace BusinessLib.Business
                         TimerActions.Remove(sys_Action);
                     }
                 }
-                isRoleCompetence = value;
+                isRoleCompetence = _value;
             }
         }
 
@@ -119,7 +122,7 @@ namespace BusinessLib.Business
             }
         }
 
-        public BusinessBase(IData db = null, ILog log = null, ICache cache = null, params System.Action[] timerActions)
+        public BusinessBase(IData db, ILog log, ICache cache, params System.Action[] timerActions)
             : this(timerActions)
         {
             this.db = db;
@@ -145,31 +148,31 @@ namespace BusinessLib.Business
 
             if (null != this.db)
             {
-                var disp = this.db.GetType().GetInterface("System.IDisposable");
+                var disp = this.db as System.IDisposable;
 
                 if (null != disp)
                 {
-                    ((IDisposable)this.db).Dispose();
+                    disp.Dispose();
                 }
             }
 
             if (null != this.log)
             {
-                var disp = this.log.GetType().GetInterface("System.IDisposable");
+                var disp = this.log as System.IDisposable;
 
                 if (null != disp)
                 {
-                    ((IDisposable)this.log).Dispose();
+                    disp.Dispose();
                 }
             }
 
             if (null != this.cache)
             {
-                var disp = this.cache.GetType().GetInterface("System.IDisposable");
+                var disp = this.cache as System.IDisposable;
 
                 if (null != disp)
                 {
-                    ((IDisposable)this.cache).Dispose();
+                    disp.Dispose();
                 }
             }
 

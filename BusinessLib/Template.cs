@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommonData = Common.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Template
 {
@@ -49,7 +50,7 @@ namespace Template
     {
         readonly IDataContext con;
         public Entitys(IDataContext con)
-             { this.con = con; }
+        { this.con = con; }
 
         public System.Linq.IQueryable<Member> Member { get { return Get<Member>(); } }
 
@@ -124,8 +125,8 @@ namespace Template
 
         public static BusinessLib.Log.LogBase OnlyLog = new BusinessLib.Log.LogBase(OnlyDB, OnlyCache);
 
-        static BusinessLib.BasicAuthentication.Interceptor InterceptorBind = new BusinessLib.BasicAuthentication.Interceptor(OnlyLog, OnlyCache, false);
-        static BusinessLib.BasicAuthentication.InterceptorNot InterceptorBindNot = new BusinessLib.BasicAuthentication.InterceptorNot(OnlyLog, OnlyCache, false);
+        static BusinessLib.BasicAuthentication.Interceptor InterceptorBind = new BusinessLib.BasicAuthentication.Interceptor(OnlyLog, OnlyCache, true);
+        static BusinessLib.BasicAuthentication.InterceptorNot InterceptorBindNot = new BusinessLib.BasicAuthentication.InterceptorNot(OnlyLog, OnlyCache, true);
 
         public static BusinessLib.Extensions.InterceptorBind<BusinessMember> Interceptor = new BusinessLib.Extensions.InterceptorBind<BusinessMember>(InterceptorBind);
         public static BusinessLib.Extensions.InterceptorBind<BusinessMemberNot> InterceptorNot = new BusinessLib.Extensions.InterceptorBind<BusinessMemberNot>(InterceptorBindNot);
@@ -135,7 +136,7 @@ namespace Template
 
     #region UnitTest
 
-    [Microsoft.VisualStudio.TestTools.UnitTesting.TestClass]
+    [TestClass]
     public class UnitTest
     {
         #region debug x86 Common.Data ...Sql To SQLServer
@@ -473,7 +474,7 @@ namespace Template
                         sql.AppendLine(Template(tbl, cols));
                     }
 
-                    var t = System.String.Join(System.Environment.NewLine, tbls.Select(c => string.Format("public ITable<{0}> {0} {{ get {{ return Get<{0}>(); }} }}", c))) + System.Environment.NewLine + System.Environment.NewLine;
+                    var t = System.String.Join(System.Environment.NewLine, tbls.Select(c => string.Format("public System.Linq.IQueryable<{0}> {0} {{ get {{ return Get<{0}>(); }} }}", c))) + System.Environment.NewLine + System.Environment.NewLine;
                     sql.Insert(0, t);
 
                     if (!System.IO.Directory.Exists(path)) { System.IO.Directory.CreateDirectory(path); }
@@ -499,85 +500,30 @@ namespace Template
             return new BusinessLib.BasicAuthentication.TokenNot { Site = "TobaccoService", IP = "192.168" }.ToString();
         }
 
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
+        [TestMethod]
         public void TestRegister()
         {
             var token = GetTokenNot();
 
             var result = Common.InterceptorNot.Instance.Register(token, new Template.Parameters.Register { account = "user1", password = "123456", email = "123456@sina.com" }.ToString());
 
-            var resultObj = ResultExtensions.Deserialize<object>(result);
-            if (0 < resultObj.State) { }
+            var resultObj = ResultExtensions.Deserialize<object>(result.ToString());
+            Assert.IsTrue(0 < resultObj.State);
         }
 
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
+        [TestMethod]
         public void TestTest()
         {
             var token = GetToken();
 
-            var ps = new Parameters.Register() { account = "hello    ", password = " 1234 69", ddd = new List<string>() { "aaa", "bbb" }, ddd1111 = new int[] { 1, 2, 3, 4, 5 } };
+            var ps = new Parameters.Register() { account = "hello    ", password = " 1234 69", ddd = new List<string>() { "aaa", "bbb" }, ddd1111 = new int[] { 1, 2, 3, 4, 5 }, fff = 9999999, dttt = System.DateTime.Now };
 
             var rrr = Common.Interceptor.Instance.Test(token, ps.ToString());
 
-            var rrr1 = ResultExtensions.Deserialize<object>(rrr);
-            if (rrr1 != null) { }
-        }
+            var json = rrr.ToString();
 
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
-        public void TestEncryptDecrypt()
-        {
-            var key = "~!@#$%^&*()";
-            var data = "ZRL+7h9wz0aTuTt0w9q056C7TR21i4scykeigu+CgodmcfYKm0nXbDQfaOoWtg1TJp3nfLSgD2GBCgryFW9gSJUOTbE6n4gSHUJn8jM3cAU4ETpG0frP3buo9wuq/B07v6fd8cwAi+r9Ml2dC1WU+9DKS8MBJKC5HxRGJyLMnIwKn1NdR4pBB4SAjd5Q6yIAomATjWt9QebrqcprRyG8zG72bJqZ9HG/I3phgRPr+QJYOBGK2QTB3MG7olRWo4UT7i84+zT53TVfV2/tLfV/M+q+OMmc2leGJ4oVQ97cCuYgEAHXM3vDkEPWe1KtN0FEm8dIasrbsmvh8ATA1NFCMln2A0fKaRrUCZNjddyrdLsI3FOXvn1yx2jZXO7+9u/YyC5WIuzFHL3O0md76QCXID6Q2s9R0eZrz7p++NxurGfJEGnn+XnDbcOU/YKE9xdC0AiIYCxwUurK88keOegcU1Z9KasQa15MPDyC5gn5yFl1W3ATxHJfHD2pFkEZaavqf30bcmJuPZm3dZnFeV+tJp8JJ3j9nr2cTwgWBFX9pWUsYL0nIulhRLdVEl6ScW9EkWfH0Qp21h8qceXOinQcdxv4ykSC/9xHBcLs88DhldZdW8T9NCBcLIVRmiFBePBOa5y3CjM1ytxFQhVvNpJCbDaxAEfz1fL+vRHDknGoWRWwByIs6LwXekq9+0FDKTQNLohMPVFalBLZizoGGTXd5TuXyiijPr7EGxPDokwesqQ/t0QLB89g+USPw/AgAl6DWjAohVgZDB68JmoDqH+tyhyni3VUZoqZLcF9Rj73sHNAu++C9R3p9JtD7upROVej+Dthkv8+tjbJMUX4ICglQTodpEa9MeOUk975BP5HTTKeDiY+pnFQ4wrPLp038aHp3Sx7/a6gPBva4Ne4fM+IjE9lcxPWXYpO13xCNAPS03TI6MWE+Qb1MFoItGGhzU8xOFM0Sy9yJE8I3hLGE78tbgCA/of2P+TBjX07jY2lHoPz0g/QTkxcS3JowgvjVooy";
-            var data1 = "{\"Key\":\"A/0Io5zT3srlIXLbtWL+xOQiNZRjgGav7rKGMK2sbMj9XPXnIGvd/nJkoBRy0v2ZGVNTnnG6OBFvV4OkDJvTBhbsEKlVLgnuG8M0K28/942wP2gBUWDb8QbcgVsUx5jizWbSvCiqU2nJ2cScIoCwNndHD6GVq27SmVVy3wf3veXZZwesWQqxERCIgzyZYYqaG0G6jwhHY1/KjEUm4peWqXFwCuGeDXDCiX7YMoObx/c8Pif9MZfwcuTowXuog4asVZRMQ1GoEm6cqfDm3rHqFhGbAEuM9D3pqeG/0flk70d/gL6S9lHOm4C+d8deGaqdYKyJDgsr1cg3bfGuIeYzyWvPWVHpbIXZOXiRSAUIhSvXBDdpyoXI+XttXFrIoErsgXFlRz+1/fZikPNr+UTLMErq8Z/LLOF6+bAhBDapxrAbBVZMKFFLl4MruUnkBPHPgu56e0Zmw0DNOqB8kqZOX8zXX33k/+BPnmhhc/SJIIrcnrzCHZq1iCt21xjNUccA\",\"Data\":\"vGhpOvLtgjmIy/ZX2s8PXa0vzBQ19UGlGDBfkZOlX/NrGTQnkDwi1Ry6MBxmXDl31uuc9tnPctS30n8BWQqxCK7FEnaveEm3yrW8pcLSHWZhEZ9nIir/bLKHjzngkh6JfApy9xFWjEmmfcNArNiVx7kE1Fqo0b0JX4k6s7gUKdWVCkUlJGvr6/3Im7HnC9CpMkMuqJdJ6zbRmg+agDv7mVAD53OlojSZP5sUvQ5BcK6N4Ng9mgTkDARe3xJlf62RAqpPXuGRsWw53WeMJdLaINRtKcUNvrq7D+xuoKZ4caHTjacC/FIBgpPOT5H8KCNqpxLN1KkVVEniKx1YQihY1++7q+rxZ4WqjkmdamzdT9TMMEo9290UdvFIRKAjr3cqz5UoJcaJZ54a2K9dIHTKSrNXR/d0hB88/7bCnc6QLL5H4WfFcb1QZbeE0YIJRo4vsXZJih8b32M2/k+c5jRgtdidPJmgHNRZJARBoWRuXgTb2qk6YVltsuoVUBtSA7JD66/K7p/PcgXa/Aw8Z5NOQ62iP0sVvBATJVuxywTrr9PW8OhzTdED+2DzaWROQ9piiXpoS2UogO7jHbPk8yNA7XuJlm0RL7pE9M9B74onIqZ/0W43YJ9GYDJb6aduONQCSqxtcmF/6sGAhd30cmOYOgqrVCZjQIvy2kd0Mm4rWZPZvAUJO5Rx2q2/50XssL+/F2Fm9wWFmFbJ59vFocmB9fIQCjmgJLW6ULCTs42Wb6q+/4Eqssbqjulj6T0U6m1uusJyZqzluMNOjmmoQOsZIVRaZVVLCh9UtcaKtwOdZoi3BK9/kgig3pT5eLWyME8j1fUqYdq+vUpZ68f2E6mJc4ENEStXmLYxO5K0d8X9MWBW/q7a6Tg957PEsdQdsSm0H1FwSgMUZFRFqf1ri5faAJdMrobKDvGlggitYjThC9aXUExlN7vXj6I78jq4Mdjeqx6dKjiaeO4TFz5hDSver+jpjUG2S+3RT21PPiRyESA=\"}";
-
-
-            //var edata = BusinessLib.Extensions.Help.Encrypt(data);
-
-            //var ddd1 = Newtonsoft.Json.JsonConvert.SerializeObject(edata);
-
-            var ddd2 = Newtonsoft.Json.JsonConvert.DeserializeObject<BusinessLib.Extensions.Help.EncryptData>(data1);
-
-            var ddata = BusinessLib.Extensions.Help.Decrypt(ddd2.Key, ddd2.Data);
-
-            var d3 = System.Text.Encoding.UTF8.GetString(ddata);
-
-            if (null != d3) { }
-        }
-
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
-        public void TestQueue()
-        {
-            System.Collections.Concurrent.BlockingCollection<string> Queue = new System.Collections.Concurrent.BlockingCollection<string>();
-
-            System.Threading.Tasks.Task.Factory.StartNew(() =>
-            {
-                System.Threading.Tasks.Parallel.For(1, 5, (i) =>
-                {
-                    Queue.Add(System.Guid.NewGuid().ToString("N"));
-
-                    System.Threading.Thread.Sleep(1000);
-
-                });
-
-                Queue.CompleteAdding();
-            });
-
-            System.Threading.Tasks.Task.Factory.StartNew(() =>
-            {
-                while (true)
-                {
-                    if (Queue.Count > 0)
-                    {
-                        string item = null;
-                        var tt = Queue.Take();
-                        if (null != tt)
-                        {
-                            var dd = item;
-                        }
-                    }
-                }
-            });
-           
+            var rrr1 = ResultExtensions.Deserialize<string[]>(json);
+            Assert.IsNotNull(rrr1);
         }
 
     }
@@ -588,13 +534,14 @@ namespace Template
 
     public class Parameters
     {
-        [Arguments(TrimChar = true)]
+        [Arguments(TrimAllChar = true)]
         public struct Register
         {
             [CanNotNull(Code = -11)]
             [Size(Min = 4, Max = "8", Code = 12, Message = "\"account\" length verification failed. min 4, max 8")]
             [CheckChar(Mode = Help.CheckCharMode.All, Code = -13)]
             public string account;
+
             [CanNotNull(Code = -14)]
             [Size(Min = 4, Max = 8, Code = 15)]
             public string password;
@@ -606,6 +553,8 @@ namespace Template
             [Size(Min = 4, Max = 8, Code = -19)]
             public int[] ddd1111;
             public string dda { get; set; }
+            public int fff { get; set; }
+            public DateTime dttt { get; set; }
 
             public override string ToString()
             {
@@ -620,22 +569,7 @@ namespace Template
     {
         public BusinessMember()
             : base(Common.OnlyDB, Common.OnlyLog, Common.OnlyCache, () =>
-            {
-                /*
-                using (var con = Common.OnlyDB.GetConnection())
-                {
-                    var query = from c in con.Entity.Get<SysConfig>()
-                                where c.type == 99 && (c.childType == 99 || c.childType == 98)
-                                select new { c.name, c.value };
-                    var sysConfig = query.ToList();
-
-                    foreach (var item in sysConfig)
-                    {
-                        Common.OnlyCache.Set(item.name, item.value);
-                    }
-                }
-                */
-            })
+            { })
         {
             this.IsRoleCompetence = true;
         }
@@ -655,7 +589,7 @@ namespace Template
 
                 using (var con = this.DB.GetConnection())
                 {
-                    var member = con.Entity.Get<Member>().Where(c => c.account == _account1).ToList();
+                    var member = con.Entity.Member.Where(c => c.account == _account1).ToList();
                     switch (member.Count)
                     {
                         case 0: _error = MarkBase.GetObject<string>(MarkEnum.Exp_UserError); break;
@@ -665,14 +599,14 @@ namespace Template
                             if (0 < sysLogin.Count && -1 == sysLogin[0].result && 0 > time.CompareTo(sysLogin[0].dtt.AddMinutes(errorFreeze)))
                             {
                                 _error = strFreeze;
-                                result = -2;//freeze
+                                result = -2;//freeze ing...
                                 break;
                             }
 
                             if (!System.Object.Equals(member[0].password, _password))
                             {
                                 _error = MarkBase.GetObject<string>(MarkEnum.Exp_PasswordError);
-                                result = 0;//password rrror
+                                result = 0;//password error
 
                                 var c = sysLogin.FindIndex(l => 0 != l.result);
                                 var range = sysLogin.Take(-1 == c ? sysLogin.Count : c);
@@ -716,10 +650,11 @@ namespace Template
             });
         }
 
-        public virtual string Test(string token, string arguments = null, BusinessLib.BasicAuthentication.ISession session = null, Parameters.Register ags = default(Parameters.Register))
+        public virtual IResult Test(string token, string arguments = null, BusinessLib.BasicAuthentication.ISession session = null, Parameters.Register ags = default(Parameters.Register))
         {
             if (ags.account == null) { }
-            return ResultExtensions.Result().ToString();
+            //return ResultExtensions.Result(new string[] { "12121", "321321" }).ToString();
+            return new ResultBase(new string[] { "12121", "321321" });
         }
     }
 
@@ -738,7 +673,7 @@ namespace Template
         /// <param name="arguments"></param>
         /// <param name="ags"></param>
         /// <returns></returns>
-        public virtual string Register(string token, string arguments, Parameters.Register ags = default(Parameters.Register))
+        public virtual IResult Register(string token, string arguments, Parameters.Register ags = default(Parameters.Register))
         {
             //check account
             using (var con = this.DB.GetConnection())
@@ -746,12 +681,12 @@ namespace Template
                 var query = from c in con.Entity.Member
                             where c.account == ags.account
                             select c.account;
-                if (0 < query.Count()) { return ResultExtensions.Result(-17, "User already exists").ToString(); }
+                if (0 < query.Count()) { return ResultExtensions.Result(-17, "User already exists"); }
 
                 var query1 = from c in con.Entity.Member
                              where c.email == ags.email
                              select c.account;
-                if (0 < query1.Count()) { return ResultExtensions.Result(-18, "Email already exists").ToString(); }
+                if (0 < query1.Count()) { return ResultExtensions.Result(-18, "Email already exists"); }
 
                 //check account number
                 var nuid = System.String.Empty;
@@ -775,7 +710,7 @@ namespace Template
                 if (0 >= this.DB.Save(member)) { throw new System.Data.DBConcurrencyException(); }
 
                 //return
-                return ResultExtensions.Result().ToString();
+                return ResultExtensions.Result();
             }
         }
     }

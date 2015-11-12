@@ -140,6 +140,13 @@
     <Compile Include="BasicAuthentication\Token.cs" />
     <Compile Include="BasicAuthentication\TokenNot.cs" />
     <Compile Include="Data\LinqToDBConnection.cs" />
+    <Compile Include="Extensions\cmstar.RapidReflection\Emit\ConstructorInvokerGenerator.cs" />
+    <Compile Include="Extensions\cmstar.RapidReflection\Emit\EmitUtils.cs" />
+    <Compile Include="Extensions\cmstar.RapidReflection\Emit\FieldAccessorGenerator.cs" />
+    <Compile Include="Extensions\cmstar.RapidReflection\Emit\MethodInvokerGenerator.cs" />
+    <Compile Include="Extensions\cmstar.RapidReflection\Emit\OpCodeExtention.cs" />
+    <Compile Include="Extensions\cmstar.RapidReflection\Emit\PropertyAccessorGenerator.cs" />
+    <Compile Include="Extensions\cmstar.RapidReflection\Net20Support.cs" />
     <Compile Include="Extensions\RestAuthentication\AuthorizationPolicyFactory.cs" />
     <Compile Include="Extensions\RestAuthentication\AuthorizationStringExtractor.cs" />
     <Compile Include="Extensions\RestAuthentication\Base64Decoder.cs" />
@@ -199,7 +206,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="MyPackage.1.0.0.nupkg" />
     <None Include="packages.config" />
     <None Include="private_key.pem" />
     <None Include="public_key.pem" />
@@ -208,6 +214,7 @@
     <Folder Include="Test\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Extensions\cmstar.RapidReflection\Quote.txt" />
     <Content Include="Extensions\cryptography\Quote.txt" />
     <Content Include="Extensions\RestAuthentication\Quote.txt" />
     <Content Include="FodyWeavers.xml" />

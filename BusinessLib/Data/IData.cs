@@ -1,5 +1,4 @@
 ﻿using BusinessLib.Entity;
-using LinqToDB;
 
 namespace BusinessLib.Data
 {

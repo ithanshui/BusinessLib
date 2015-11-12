@@ -184,9 +184,17 @@ namespace BusinessLib.Data
             return new Paging<T>(data, currentPage, count);
         }
 
-        public static IQueryable<T> SkipRandom<T>(this IQueryable<T> query)
+        public static IQueryable<T> SkipRandom<T>(this IQueryable<T> query, int take = 0)
         {
-            return query.Skip(query.Count().Random());
+            if (0 < take)
+            {
+                query = query.Skip((query.Count() - take).Random()).Take(take);
+            }
+            else
+            {
+                query = query.Skip(query.Count().Random());
+            }
+            return query;
         }
         //public static int Execute(this IConnection connection, object obj, System.Func<object, int> func)
         //{

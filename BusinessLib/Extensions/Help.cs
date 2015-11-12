@@ -403,7 +403,7 @@ namespace BusinessLib.Extensions
             }
         }
 
-        public static BusinessLib.Result.ResultBase<T> CheckObject<T>(this T ags, string memberName = null, int state = -999, object min = null, object max = null)
+        public static BusinessLib.Result.IResult CheckObject<T>(this T ags, string memberName = null, int state = -999, object min = null, object max = null)
         {
             var type = ags.GetType();
 
@@ -414,66 +414,66 @@ namespace BusinessLib.Extensions
                         : System.Convert.ToString(ags).Trim();
                     if (null != min && System.Convert.ToInt32(min) > _ags1.Length)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" minimum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
                     }
                     if (null != max && System.Convert.ToInt32(max) < _ags1.Length)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" maximum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
                     }
                     return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags1));
                 case "System.DateTime":
                     var _ags2 = System.Convert.ToDateTime(ags);
                     if (System.Data.SqlTypes.SqlDateTime.MinValue.Value > _ags2)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" minimum value error", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum value error", memberName));
                     }
                     return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags2));
                 case "System.Int32":
                     var _ags3 = System.Convert.ToInt32(ags);
                     if (null != min && System.Convert.ToInt32(min) > _ags3)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" minimum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
                     }
                     if (null != max && System.Convert.ToInt32(max) < _ags3)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" maximum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
                     }
                     return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags3));
                 case "System.Int64":
                     var _ags4 = System.Convert.ToInt64(ags);
                     if (null != min && System.Convert.ToInt64(min) > _ags4)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" minimum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
                     }
                     if (null != max && System.Convert.ToInt64(max) < _ags4)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" maximum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
                     }
                     return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags4));
                 case "System.Decimal":
                     var _ags5 = System.Convert.ToDecimal(ags);
                     if (null != min && System.Convert.ToDecimal(min) > _ags5)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" minimum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
                     }
                     if (null != max && System.Convert.ToDecimal(max) < _ags5)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" maximum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
                     }
                     return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags5));
                 case "System.Double":
                     var _ags6 = System.Convert.ToDouble(ags);
                     if (null != min && System.Convert.ToDouble(min) > _ags6)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" minimum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
                     }
                     if (null != max && System.Convert.ToDouble(max) < _ags6)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" maximum length exceeds", memberName));
+                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
                     }
                     return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags6));
                 default:
-                    return BusinessLib.Result.ResultExtensions.Result<T>(state, string.Format("\"{0}\" unknown error", memberName));
+                    return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" unknown error", memberName));
             }
         }
 
@@ -566,12 +566,6 @@ namespace BusinessLib.Extensions
         //    return System.BitConverter.ToInt32(bytes, 0);
         //}
 
-        /// <summary>
-        /// 返回一个指定范围内的随机数。
-        /// </summary>
-        /// <param name="minValue">返回的随机数的下界（随机数可取该下界值）。</param>
-        /// <param name="maxValue">返回的随机数的上界（随机数不能取该上界值）。maxValue 必须大于或等于 minValue。</param>
-        /// <returns>一个大于等于 minValue 且小于 maxValue 的 32 位带符号整数，即：返回的值范围包括 minValue 但不包括 maxValue。如果 minValue 等于 maxValue，则返回 minValue。</returns>
         public static int Random(int minValue, int maxValue)
         {
             using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
@@ -581,11 +575,6 @@ namespace BusinessLib.Extensions
                 return new System.Random(System.BitConverter.ToInt32(bytes, 0)).Next(minValue, maxValue);
             }
         }
-        /// <summary>
-        /// 返回一个小于所指定最大值的非负随机数。
-        /// </summary>
-        /// <param name="maxValue"></param>
-        /// <returns></returns>
         public static int Random(this int maxValue)
         {
             using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())

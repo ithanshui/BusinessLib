@@ -2,28 +2,30 @@ namespace BusinessLib.Attributes
 {
     using BusinessLib.Extensions;
     using System.Linq;
-
+    
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public class ArgumentsAttribute : System.Attribute
     {
-        public bool TrimChar { get; set; }
+        public bool TrimAllChar { get; set; }
     }
 
-    [System.AttributeUsage(System.AttributeTargets.Parameter | System.AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
-    public abstract class ArgumentAttribute : System.Attribute
+    [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
+    public abstract class ArgumentAttribute : System.Attribute { }
+
+    public abstract class CheckedAttribute : ArgumentAttribute
     {
         public abstract int Code { get; set; }
         public string Message { get; set; }
 
-        public abstract BusinessLib.Result.IResult<object> Checked(System.Type type, object value, string name);
+        public abstract BusinessLib.Result.IResult Checked(System.Type type, object value, string name);
     }
 
-    public class CanNotNullAttribute : ArgumentAttribute
+    public class CanNotNullAttribute : CheckedAttribute
     {
         int code = -999;
         public override int Code { get { return code; } set { code = value; } }
 
-        public override Result.IResult<object> Checked(System.Type type, object value, string name = null)
+        public override Result.IResult Checked(System.Type type, object value, string name = null)
         {
             if (null == value)
             {
@@ -34,7 +36,7 @@ namespace BusinessLib.Attributes
         }
     }
 
-    public class SizeAttribute : ArgumentAttribute
+    public class SizeAttribute : CheckedAttribute
     {
         int code = -998;
         public override int Code { get { return code; } set { code = value; } }
@@ -42,7 +44,7 @@ namespace BusinessLib.Attributes
         public object Min { get; set; }
         public object Max { get; set; }
 
-        public override Result.IResult<object> Checked(System.Type type, object value, string name)
+        public override Result.IResult Checked(System.Type type, object value, string name)
         {
             if (null == value) { return null; }
 
@@ -142,25 +144,25 @@ namespace BusinessLib.Attributes
         }
     }
 
-    public class ScaleAttribute : ArgumentAttribute
+    public class ScaleAttribute : CheckedAttribute
     {
         int code = -997;
         public override int Code { get { return code; } set { code = value; } }
 
         public int Scale { get; set; }
 
-        public override Result.IResult<object> Checked(System.Type type, object value, string name = null)
+        public override Result.IResult Checked(System.Type type, object value, string name = null)
         {
             return null;
         }
     }
 
-    public class CheckEmailAttribute : ArgumentAttribute
+    public class CheckEmailAttribute : CheckedAttribute
     {
         int code = -996;
         public override int Code { get { return code; } set { code = value; } }
 
-        public override Result.IResult<object> Checked(System.Type type, object value, string name)
+        public override Result.IResult Checked(System.Type type, object value, string name)
         {
             if (null == value) { return null; }
 
@@ -174,7 +176,7 @@ namespace BusinessLib.Attributes
         }
     }
 
-    public class CheckCharAttribute : ArgumentAttribute
+    public class CheckCharAttribute : CheckedAttribute
     {
         int code = -995;
         public override int Code { get { return code; } set { code = value; } }
@@ -182,7 +184,7 @@ namespace BusinessLib.Attributes
         BusinessLib.Extensions.Help.CheckCharMode mode = Extensions.Help.CheckCharMode.All;
         public BusinessLib.Extensions.Help.CheckCharMode Mode { get { return mode; } set { mode = value; } }
 
-        public override Result.IResult<object> Checked(System.Type type, object value, string name)
+        public override Result.IResult Checked(System.Type type, object value, string name)
         {
             if (null == value) { return null; }
 
@@ -195,4 +197,9 @@ namespace BusinessLib.Attributes
             return null;
         }
     }
+
+    //public class LogRecordAttribute : ArgumentAttribute
+    //{
+    //    public bool AllowNotRecord { get; set; }
+    //}
 }
