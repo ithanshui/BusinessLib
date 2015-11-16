@@ -2,7 +2,7 @@
 namespace BusinessLib.Entity
 {
     [Table(Name = "SysLog")]
-    public class SysLog : EntityBase
+    public class SysLog : LinqToDBEntity
     {
         [Column(Name = "type"), NotNull]
         public System.Int32 type { get; set; }

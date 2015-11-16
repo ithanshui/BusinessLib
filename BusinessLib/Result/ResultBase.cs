@@ -41,7 +41,7 @@
         public dynamic Data { get; set; }
 
         /// <summary>
-        /// Json。
+        /// Json
         /// </summary>
         /// <returns></returns>
         public override string ToString()
@@ -53,7 +53,7 @@
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, settings);
         }
         /// <summary>
-        /// ProtoBuf。
+        /// ProtoBuf
         /// </summary>
         /// <returns></returns>
         public byte[] ToBytes()
@@ -102,7 +102,7 @@
         public DataType Data { get; set; }
 
         /// <summary>
-        /// Json。
+        /// Json
         /// </summary>
         /// <returns></returns>
         public override string ToString()
@@ -114,7 +114,7 @@
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, settings);
         }
         /// <summary>
-        /// ProtoBuf。
+        /// ProtoBuf
         /// </summary>
         /// <returns></returns>
         public byte[] ToBytes()

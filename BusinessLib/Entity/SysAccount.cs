@@ -2,7 +2,7 @@
 namespace BusinessLib.Entity
 {
     [Table(Name = "SysAccount")]
-    public class SysAccount : EntityBase
+    public class SysAccount : LinqToDBEntity
     {
         [Column(Name = "parent")]
         public string parent { get; set; }

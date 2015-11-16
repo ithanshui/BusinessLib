@@ -47,26 +47,32 @@ namespace BusinessLib.Extensions
             }
         }
 
-        internal static System.Collections.Generic.Dictionary<string, InterceptorMetaData> GetInterceptorMetaData(Type type)
+        static System.Collections.Generic.Dictionary<string, InterceptorMetaData> GetInterceptorMetaData(System.Type type)
         {
             var interceptorMetaData = new System.Collections.Generic.Dictionary<string, InterceptorMetaData>();
 
             //atts
-            var methods = type.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public).Where(c => c.IsVirtual && !c.IsFinal && c.IsSecurityCritical && !c.IsSecuritySafeCritical && !c.IsSecurityTransparent);
+            //var methods = type.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public).Where(c => c.IsVirtual && !c.IsFinal && c.IsSecurityCritical && !c.IsSecuritySafeCritical && !c.IsSecurityTransparent);
+            var methodsAll = type.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            var methods = System.Array.FindAll(methodsAll, c => c.IsVirtual && !c.IsFinal && c.IsSecurityCritical && !c.IsSecuritySafeCritical && !c.IsSecurityTransparent);
+
             foreach (var item in methods)
             {
-                var agsTypes = item.GetParameters().Select(c => c.ParameterType).ToArray();
+                //var agsTypes = item.GetParameters().Select(c => c.ParameterType).ToArray();
+                var ags = item.GetParameters();
+                var agsTypes = new System.Type[ags.Length];
+                for (int i2 = 0; i2 < ags.Length; i2++) { agsTypes[i2] = ags[i2].ParameterType; }
 
                 var i = -1;
                 Attributes.ArgumentsAttribute attrs = null;
-                Type agsType = null;
+                System.Type agsType = null;
                 for (int i1 = 0; i1 < agsTypes.Length; i1++)
                 {
                     var argumentsAttrs = agsTypes[i1].GetCustomAttributes(typeof(Attributes.ArgumentsAttribute), true);
                     if (0 < argumentsAttrs.Length) { i = i1; agsType = agsTypes[i1]; attrs = argumentsAttrs[0] as Attributes.ArgumentsAttribute; break; }
                 }
 
-                var metaData = new InterceptorMetaData(System.Array.FindIndex(agsTypes, p => p.Equals(typeof(BusinessLib.BasicAuthentication.ISession))), new Tuple<int, Type, Attributes.ArgumentsAttribute>(i, agsType, attrs), new Dictionary<string, Tuple<System.Type, Func<object, object>, Action<object, object>>>(), new Dictionary<string, Tuple<Type, List<Attributes.CheckedAttribute>>>(), new Dictionary<string, Tuple<Type, List<Attributes.ArgumentAttribute>>>(), item.GetMethodFullName());
+                var metaData = new InterceptorMetaData(System.Array.FindIndex(agsTypes, p => p.Equals(typeof(BusinessLib.BasicAuthentication.ISession))), new System.Tuple<int, System.Type, Attributes.ArgumentsAttribute>(i, agsType, attrs), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>>(), item.GetMethodFullName());
 
                 if (-1 < i)
                 {
@@ -114,7 +120,7 @@ namespace BusinessLib.Extensions
 
     public struct InterceptorMetaData
     {
-        public InterceptorMetaData(int sessionPosition, System.Tuple<int, Type, Attributes.ArgumentsAttribute> arguments, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> memberAccessor, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>> checkedAtts, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>> argumentAtts, string fullName)
+        public InterceptorMetaData(int sessionPosition, System.Tuple<int, System.Type, Attributes.ArgumentsAttribute> arguments, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> memberAccessor, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>> checkedAtts, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>> argumentAtts, string fullName)
         {
             this.sessionPosition = sessionPosition;
             this.arguments = arguments;

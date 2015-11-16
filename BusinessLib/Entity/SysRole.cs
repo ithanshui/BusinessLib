@@ -2,7 +2,7 @@
 namespace BusinessLib.Entity
 {
     [Table(Name = "SysRole")]
-    public class SysRole : EntityBase
+    public class SysRole : LinqToDBEntity
     {
         [Column(Name = "account")]
         public string account { get; set; }

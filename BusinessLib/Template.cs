@@ -62,7 +62,7 @@ namespace Template
 
     #region Entitys
     [Table(Name = "Member")]
-    public class Member : EntityBase
+    public class Member : LinqToDBEntity
     {
         [Column(Name = "account", Length = 16, DataType = DataType.VarChar), NotNull]
         public System.String account { get; set; }
@@ -148,7 +148,7 @@ namespace Template
 
             sb.AppendFormat("    [Table(Name = \"{1}\")]{0}", line, tbl);
 
-            sb.AppendFormat("    public class {1} : EntityBase{0}", line, tbl);
+            sb.AppendFormat("    public class {1} : LinqToDBEntity{0}", line, tbl);
 
             sb.AppendFormat("    {{{0}", line);
 

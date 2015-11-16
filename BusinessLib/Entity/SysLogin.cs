@@ -2,7 +2,7 @@
 namespace BusinessLib.Entity
 {
     [Table(Name = "SysLogin")]
-    public class SysLogin : EntityBase
+    public class SysLogin : LinqToDBEntity
     {
         [Column(Name = "session"), NotNull]
         public string session { get; set; }

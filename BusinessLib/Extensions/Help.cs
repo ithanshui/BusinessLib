@@ -551,13 +551,6 @@ namespace BusinessLib.Extensions
             }
         }
 
-        public static string GetClientIP()
-        {
-            //获取消息发送的远程终结点IP和端口
-            var endpoint = System.ServiceModel.OperationContext.Current.IncomingMessageProperties[System.ServiceModel.Channels.RemoteEndpointMessageProperty.Name] as System.ServiceModel.Channels.RemoteEndpointMessageProperty;
-            return string.Format("{0}:{1}", endpoint.Address, endpoint.Port);
-        }
-
         //public static int GetRandomSeed()
         //{
         //    var bytes = new byte[4];

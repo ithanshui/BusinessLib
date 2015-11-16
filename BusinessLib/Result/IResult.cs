@@ -13,6 +13,18 @@
         [ProtoBuf.ProtoMember(3, Name = "D")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
         DataType Data { get; set; }
+
+        /// <summary>
+        /// Json
+        /// </summary>
+        /// <returns></returns>
+        string ToString();
+
+        /// <summary>
+        /// ProtoBuf
+        /// </summary>
+        /// <returns></returns>
+        byte[] ToBytes();
     }
 
     public interface IResult
@@ -28,5 +40,17 @@
         [ProtoBuf.ProtoMember(3, Name = "D")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
         dynamic Data { get; set; }
+
+        /// <summary>
+        /// Json
+        /// </summary>
+        /// <returns></returns>
+        string ToString();
+
+        /// <summary>
+        /// ProtoBuf
+        /// </summary>
+        /// <returns></returns>
+        byte[] ToBytes();
     }
 }
