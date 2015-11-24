@@ -1,7 +1,7 @@
 ﻿using BusinessLib.Extensions;
 namespace Common.Net
 {
-    public class WebSocketSession : SuperWebSocket.WebSocketSession<WebSocketSession>
+    public class WebSocketSession : SuperSocket.WebSocket.WebSocketSession<WebSocketSession>
     {
         public void Send(string key, byte[] data, int offset, int length, bool compres = false)
         {

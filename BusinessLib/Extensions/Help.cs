@@ -403,6 +403,7 @@ namespace BusinessLib.Extensions
             }
         }
 
+        /*
         public static BusinessLib.Result.IResult CheckObject<T>(this T ags, string memberName = null, int state = -999, object min = null, object max = null)
         {
             var type = ags.GetType();
@@ -414,13 +415,13 @@ namespace BusinessLib.Extensions
                         : System.Convert.ToString(ags).Trim();
                     if (null != min && System.Convert.ToInt32(min) > _ags1.Length)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
+                        return BusinessLib.Result.ResultFactory.Create(state, string.Format("\"{0}\" minimum length exceeds", memberName));
                     }
                     if (null != max && System.Convert.ToInt32(max) < _ags1.Length)
                     {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
+                        return BusinessLib.Result.ResultFactory.Create(state, string.Format("\"{0}\" maximum length exceeds", memberName));
                     }
-                    return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags1));
+                    return BusinessLib.Result.ResultFactory.Create<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags1));
                 case "System.DateTime":
                     var _ags2 = System.Convert.ToDateTime(ags);
                     if (System.Data.SqlTypes.SqlDateTime.MinValue.Value > _ags2)
@@ -476,6 +477,7 @@ namespace BusinessLib.Extensions
                     return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" unknown error", memberName));
             }
         }
+        */
 
         public static string NewGuidNumber()
         {
@@ -641,9 +643,9 @@ namespace BusinessLib.Extensions
         #endregion
 
         #region ProtoBuf Serialize
-        public static T ProtoBufDeserialize<T>(this System.Byte[] bytes)
+        public static T ProtoBufDeserialize<T>(this System.Byte[] source)
         {
-            using (var stream = new System.IO.MemoryStream(bytes))
+            using (var stream = new System.IO.MemoryStream(source))
             {
                 return ProtoBuf.Serializer.Deserialize<T>(stream);
             }

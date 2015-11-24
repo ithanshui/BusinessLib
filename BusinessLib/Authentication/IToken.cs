@@ -1,4 +1,4 @@
-﻿namespace BusinessLib.BasicAuthentication
+﻿namespace BusinessLib.Authentication
 {
     public interface IToken
     {

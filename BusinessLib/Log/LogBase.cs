@@ -4,9 +4,6 @@ namespace BusinessLib.Log
 {
     public class LogBase : BusinessLib.Log.ILog
     {
-        //System.IObservable<string> dd;
-        //static System.Collections.Concurrent.BlockingCollection<SysLog> Queue;
-
         readonly BusinessLib.Data.IData db;
 
         public BusinessLib.Data.IData DB { get { return db; } }

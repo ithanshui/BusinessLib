@@ -24,6 +24,9 @@ namespace BusinessLib.Entity
         [Column(Name = "errorCount")]
         public int errorCount { get; set; }
 
+        [Column(Name = "frozen")]
+        public bool frozen { get; set; }
+
         [Column(Name = "securityCode")]
         public string securityCode { get; set; }
     }

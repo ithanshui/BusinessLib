@@ -1,4 +1,4 @@
-﻿namespace BusinessLib.BasicAuthentication
+﻿namespace BusinessLib.Authentication
 {
     public struct TokenNot : ITokenNot
     {

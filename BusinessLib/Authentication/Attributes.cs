@@ -2,7 +2,7 @@ namespace BusinessLib.Attributes
 {
     using BusinessLib.Extensions;
     using System.Linq;
-    
+
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public class ArgumentsAttribute : System.Attribute
     {
@@ -17,7 +17,7 @@ namespace BusinessLib.Attributes
         public abstract int Code { get; set; }
         public string Message { get; set; }
 
-        public abstract BusinessLib.Result.IResult Checked(System.Type type, object value, string name);
+        public abstract Result Checked<Result>(System.Type type, object value, string name) where Result : class, BusinessLib.Result.IResult, new();
     }
 
     public class CanNotNullAttribute : CheckedAttribute
@@ -25,12 +25,12 @@ namespace BusinessLib.Attributes
         int code = -999;
         public override int Code { get { return code; } set { code = value; } }
 
-        public override Result.IResult Checked(System.Type type, object value, string name = null)
+        public override Result Checked<Result>(System.Type type, object value, string name = null)
         {
             if (null == value)
             {
                 var msg = System.String.IsNullOrEmpty(Message) ? string.Format("argument \"{0}\" can not null.", name) : Message;
-                return BusinessLib.Result.ResultExtensions.Result(Code, msg);
+                return BusinessLib.Result.ResultFactory.Create<Result>(Code, msg);
             }
             return null;
         }
@@ -44,7 +44,7 @@ namespace BusinessLib.Attributes
         public object Min { get; set; }
         public object Max { get; set; }
 
-        public override Result.IResult Checked(System.Type type, object value, string name)
+        public override Result Checked<Result>(System.Type type, object value, string name)
         {
             if (null == value) { return null; }
 
@@ -138,7 +138,7 @@ namespace BusinessLib.Attributes
             if (!System.String.IsNullOrEmpty(msg))
             {
                 msg = System.String.IsNullOrEmpty(Message) ? msg : Message;
-                return BusinessLib.Result.ResultExtensions.Result(Code, msg);
+                return BusinessLib.Result.ResultFactory.Create<Result>(Code, msg);
             }
             return null;
         }
@@ -151,9 +151,9 @@ namespace BusinessLib.Attributes
 
         public int Scale { get; set; }
 
-        public override Result.IResult Checked(System.Type type, object value, string name = null)
+        public override Result Checked<Result>(System.Type type, object value, string name)
         {
-            return null;
+            throw new System.NotImplementedException();
         }
     }
 
@@ -162,7 +162,7 @@ namespace BusinessLib.Attributes
         int code = -996;
         public override int Code { get { return code; } set { code = value; } }
 
-        public override Result.IResult Checked(System.Type type, object value, string name)
+        public override Result Checked<Result>(System.Type type, object value, string name)
         {
             if (null == value) { return null; }
 
@@ -170,7 +170,7 @@ namespace BusinessLib.Attributes
             if (!System.String.IsNullOrEmpty(_value) && !_value.CheckEmail())
             {
                 var msg = System.String.IsNullOrEmpty(Message) ? string.Format("argument \"{0}\" email error.", name) : Message;
-                return BusinessLib.Result.ResultExtensions.Result(Code, msg);
+                return BusinessLib.Result.ResultFactory.Create<Result>(Code, msg);
             }
             return null;
         }
@@ -184,7 +184,7 @@ namespace BusinessLib.Attributes
         BusinessLib.Extensions.Help.CheckCharMode mode = Extensions.Help.CheckCharMode.All;
         public BusinessLib.Extensions.Help.CheckCharMode Mode { get { return mode; } set { mode = value; } }
 
-        public override Result.IResult Checked(System.Type type, object value, string name)
+        public override Result Checked<Result>(System.Type type, object value, string name)
         {
             if (null == value) { return null; }
 
@@ -192,7 +192,7 @@ namespace BusinessLib.Attributes
             if (!System.String.IsNullOrEmpty(_value) && !_value.CheckChar(Mode))
             {
                 var msg = System.String.IsNullOrEmpty(Message) ? string.Format("argument \"{0}\" char verification failed.", name) : Message;
-                return BusinessLib.Result.ResultExtensions.Result(Code, msg);
+                return BusinessLib.Result.ResultFactory.Create<Result>(Code, msg);
             }
             return null;
         }

@@ -1,18 +1,10 @@
 ﻿namespace BusinessLib.Result
 {
-    public interface IResult<DataType>
+    public interface IResult
     {
-        [ProtoBuf.ProtoMember(1, Name = "S")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
         System.Int32 State { get; set; }
 
-        [ProtoBuf.ProtoMember(2, Name = "M")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
         System.String Message { get; set; }
-
-        [ProtoBuf.ProtoMember(3, Name = "D")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
-        DataType Data { get; set; }
 
         /// <summary>
         /// Json
@@ -27,30 +19,8 @@
         byte[] ToBytes();
     }
 
-    public interface IResult
+    public interface IResult<DataType> : IResult
     {
-        [ProtoBuf.ProtoMember(1, Name = "S")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
-        System.Int32 State { get; set; }
-
-        [ProtoBuf.ProtoMember(2, Name = "M")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
-        System.String Message { get; set; }
-
-        [ProtoBuf.ProtoMember(3, Name = "D")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
-        dynamic Data { get; set; }
-
-        /// <summary>
-        /// Json
-        /// </summary>
-        /// <returns></returns>
-        string ToString();
-
-        /// <summary>
-        /// ProtoBuf
-        /// </summary>
-        /// <returns></returns>
-        byte[] ToBytes();
+        DataType Data { get; set; }
     }
 }

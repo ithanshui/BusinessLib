@@ -1,5 +1,5 @@
 ﻿using BusinessLib.Attributes;
-using BusinessLib.BasicAuthentication;
+using BusinessLib.Authentication;
 using BusinessLib.Business;
 using BusinessLib.Data;
 using BusinessLib.Entity;
@@ -17,6 +17,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CommonData = Common.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ProtoBuf;
+using ProtoBuf.Meta;
 
 namespace Template
 {
@@ -125,11 +127,54 @@ namespace Template
 
         public static BusinessLib.Log.LogBase OnlyLog = new BusinessLib.Log.LogBase(OnlyDB, OnlyCache);
 
-        static BusinessLib.BasicAuthentication.Interceptor InterceptorBind = new BusinessLib.BasicAuthentication.Interceptor(OnlyLog, OnlyCache, true);
-        static BusinessLib.BasicAuthentication.InterceptorNot InterceptorBindNot = new BusinessLib.BasicAuthentication.InterceptorNot(OnlyLog, OnlyCache, true);
+        static BusinessLib.Authentication.Interceptor<ResultProtoBuf> Authentication = new BusinessLib.Authentication.Interceptor<ResultProtoBuf>(OnlyLog, OnlyCache, true);
+        static BusinessLib.Authentication.InterceptorNot<ResultProtoBuf> AuthenticationNot = new BusinessLib.Authentication.InterceptorNot<ResultProtoBuf>(OnlyLog, OnlyCache, true);
 
-        public static BusinessLib.Extensions.InterceptorBind<BusinessMember> Interceptor = new BusinessLib.Extensions.InterceptorBind<BusinessMember>(InterceptorBind);
-        public static BusinessLib.Extensions.InterceptorBind<BusinessMemberNot> InterceptorNot = new BusinessLib.Extensions.InterceptorBind<BusinessMemberNot>(InterceptorBindNot);
+        public static BusinessLib.Extensions.InterceptorBind<BusinessMember> Interceptor = new BusinessLib.Extensions.InterceptorBind<BusinessMember>(Authentication);
+        public static BusinessLib.Extensions.InterceptorBind<BusinessMemberNot> InterceptorNot = new BusinessLib.Extensions.InterceptorBind<BusinessMemberNot>(AuthenticationNot);
+
+        public static IResult<DataType> GetResult<DataType>(this DataType data)
+        {
+            return new ResultProtoBuf<DataType>();
+        }
+    }
+
+    [ProtoBuf.ProtoContract(SkipConstructor = true)]
+    public class ResultProtoBuf : IResult
+    {
+        [ProtoBuf.ProtoMember(1, Name = "S")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
+        public virtual System.Int32 State { get; set; }
+
+        [ProtoBuf.ProtoMember(2, Name = "M")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
+        public virtual System.String Message { get; set; }
+
+        public override string ToString()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+
+        public byte[] ToBytes()
+        {
+            return BusinessLib.Extensions.Help.ProtoBufSerialize(this);
+        }
+    }
+
+    [ProtoBuf.ProtoContract(SkipConstructor = true)]
+    public class ResultProtoBuf<DataType> : ResultProtoBuf, IResult<DataType>
+    {
+        [ProtoBuf.ProtoMember(1, Name = "S")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
+        public override System.Int32 State { get; set; }
+
+        [ProtoBuf.ProtoMember(2, Name = "M")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
+        public override System.String Message { get; set; }
+
+        [ProtoBuf.ProtoMember(3, Name = "D")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
+        public DataType Data { get; set; }
     }
 
     #endregion
@@ -489,15 +534,15 @@ namespace Template
         static string GetToken()
         {
             var error = System.String.Empty;
-            var session = new BusinessLib.BasicAuthentication.Session { Account = "admin", Password = "test", IP = "192.168", Site = "Site" }.ToString();
+            var session = new BusinessLib.Authentication.Session { Account = "admin", Password = "test", IP = "192.168", Site = "Site" }.ToString();
             var sss = Common.Interceptor.Instance.Login(session, out error);
             if (null != sss) { }
-            var token = new BusinessLib.BasicAuthentication.Token { Key = sss, IP = "192.168" }.ToString();
+            var token = new BusinessLib.Authentication.Token { Key = sss, IP = "192.168" }.ToString();
             return token;
         }
         static string GetTokenNot()
         {
-            return new BusinessLib.BasicAuthentication.TokenNot { Site = "TobaccoService", IP = "192.168" }.ToString();
+            return new BusinessLib.Authentication.TokenNot { Site = "TobaccoService", IP = "192.168" }.ToString();
         }
 
         [TestMethod]
@@ -506,24 +551,33 @@ namespace Template
             var token = GetTokenNot();
 
             var result = Common.InterceptorNot.Instance.Register(token, new Template.Parameters.Register { account = "user1", password = "123456", email = "123456@sina.com" }.ToString());
-
-            var resultObj = ResultExtensions.Deserialize<object>(result.ToString());
-            Assert.IsTrue(0 < resultObj.State);
         }
 
+        [ProtoBuf.ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+        public class A { public string a { get; set; } public string b { get; set; } }
+
         [TestMethod]
-        public void TestTest()
+        public void TestResult()
         {
-            var token = GetToken();
+            var token = GetTokenNot();
 
             var ps = new Parameters.Register() { account = "hello    ", password = " 1234 69", ddd = new List<string>() { "aaa", "bbb" }, ddd1111 = new int[] { 1, 2, 3, 4, 5 }, fff = 9999999, dttt = System.DateTime.Now };
 
-            var rrr = Common.Interceptor.Instance.Test(token, ps.ToString());
+            var rrr = Common.InterceptorNot.Instance.Test(token, ps.ToString());//database
+            var rrr2 = Common.InterceptorNot.MetaData["Test"].Method(token, ps.ToString());
 
-            var json = rrr.ToString();
+            var json = rrr.ToString();//out
 
-            var rrr1 = ResultExtensions.Deserialize<string[]>(json);
-            Assert.IsNotNull(rrr1);
+            var bytes = rrr.ToBytes();//out
+
+            var r1 = ResultFactory.DeserializeResultProtoBuf<System.Tuple<string, string>, ResultProtoBuf<System.Tuple<string, string>>>(bytes);
+            Assert.AreEqual(r1.Data.Item1, "12121");
+
+            var r2 = ResultFactory.DeserializeResultProtoBuf<A>(bytes);
+            Assert.AreEqual(r2.Data.a, "12121");
+
+            var r3 = ResultFactory.DeserializeResultJson<A>(json);
+            Assert.AreEqual(r3.Data.a, "12121");
         }
 
     }
@@ -545,13 +599,17 @@ namespace Template
             [CanNotNull(Code = -14)]
             [Size(Min = 4, Max = 8, Code = 15)]
             public string password;
+
             [CheckEmail(Code = 16)]
             [Size(Min = 4, Max = 32, Code = -17)]
             public string email;
-            [Size(Min = 4, Max = 8, Code = -18)]
+
+            //[Size(Min = 4, Max = 8, Code = -18)]
             public List<string> ddd;
+
             [Size(Min = 4, Max = 8, Code = -19)]
             public int[] ddd1111;
+
             public string dda { get; set; }
             public int fff { get; set; }
             public DateTime dttt { get; set; }
@@ -650,11 +708,12 @@ namespace Template
             });
         }
 
-        public virtual IResult Test(string token, string arguments = null, BusinessLib.BasicAuthentication.ISession session = null, Parameters.Register ags = default(Parameters.Register))
+        public virtual IResult Test(string token, object arguments = null, BusinessLib.Authentication.ISession session = null, Parameters.Register ags = default(Parameters.Register))
         {
             if (ags.account == null) { }
-            //return ResultExtensions.Result(new string[] { "12121", "321321" }).ToString();
-            return new ResultBase(new string[] { "12121", "321321" });
+
+            var data = new { a = "12121", b = "321321" };
+            return ResultFactory.Create(data, data.GetResult(), 33);
         }
     }
 
@@ -673,7 +732,7 @@ namespace Template
         /// <param name="arguments"></param>
         /// <param name="ags"></param>
         /// <returns></returns>
-        public virtual IResult Register(string token, string arguments, Parameters.Register ags = default(Parameters.Register))
+        public virtual IResult Register(string token, object arguments, Parameters.Register ags = default(Parameters.Register))
         {
             //check account
             using (var con = this.DB.GetConnection())
@@ -681,12 +740,12 @@ namespace Template
                 var query = from c in con.Entity.Member
                             where c.account == ags.account
                             select c.account;
-                if (0 < query.Count()) { return ResultExtensions.Result(-17, "User already exists"); }
+                if (0 < query.Count()) { return ResultFactory.Create(-17, "User already exists"); }
 
                 var query1 = from c in con.Entity.Member
                              where c.email == ags.email
                              select c.account;
-                if (0 < query1.Count()) { return ResultExtensions.Result(-18, "Email already exists"); }
+                if (0 < query1.Count()) { return ResultFactory.Create(-18, "Email already exists"); }
 
                 //check account number
                 var nuid = System.String.Empty;
@@ -710,8 +769,29 @@ namespace Template
                 if (0 >= this.DB.Save(member)) { throw new System.Data.DBConcurrencyException(); }
 
                 //return
-                return ResultExtensions.Result();
+                return ResultFactory.Create();
             }
+        }
+
+        public virtual IResult Test(string token, object arguments = null, BusinessLib.Authentication.ISession session = null, Parameters.Register ags = default(Parameters.Register))
+        {
+            if (ags.account == null) { }
+
+            var data = new { a = "12121", b = "321321" };
+            return ResultFactory.Create(data, data.GetResult(), 33);
+        }
+
+        public virtual IResult Test(string token)
+        {
+            return ResultFactory.Create();
+        }
+        public virtual IResult Test2(string token, object arguments = null)
+        {
+            return ResultFactory.Create();
+        }
+        public virtual IResult Test3(string token, object arguments = null, BusinessLib.Authentication.ISession session = null)
+        {
+            return ResultFactory.Create();
         }
     }
 }

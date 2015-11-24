@@ -7,16 +7,16 @@
     /// <summary>
     /// WebSocket AppServer
     /// </summary>
-    public class WebSocketServer : SuperWebSocket.WebSocketServer<WebSocketSession>
+    public class WebSocketServer : SuperSocket.WebSocket.WebSocketServer<WebSocketSession>
     {
         internal System.Collections.Concurrent.ConcurrentDictionary<string, SubCommandBaseByte> subCommands;// = new System.Collections.Concurrent.ConcurrentDictionary<string, SubCommandBaseByte>();
-        public WebSocketServer(System.Collections.Generic.IEnumerable<SuperWebSocket.SubProtocol.ISubProtocol<WebSocketSession>> subProtocols)
+        public WebSocketServer(System.Collections.Generic.IEnumerable<SuperSocket.WebSocket.SubProtocol.ISubProtocol<WebSocketSession>> subProtocols)
             : base(subProtocols) { subCommands = CreateSubClass<SubCommandBaseByte>(System.AppDomain.CurrentDomain.GetAssemblies()); base.NewDataReceived += WebSocketServer_NewDataReceived; }
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketServer"/> class.
         /// </summary>
         /// <param name="subProtocol">The sub protocol.</param>
-        public WebSocketServer(SuperWebSocket.SubProtocol.ISubProtocol<WebSocketSession> subProtocol)
+        public WebSocketServer(SuperSocket.WebSocket.SubProtocol.ISubProtocol<WebSocketSession> subProtocol)
             : base(subProtocol)
         {
             subCommands = CreateSubClass<SubCommandBaseByte>(System.AppDomain.CurrentDomain.GetAssemblies()); base.NewDataReceived += WebSocketServer_NewDataReceived;
@@ -25,13 +25,13 @@
         /// Initializes a new instance of the <see cref="WebSocketServer"/> class.
         /// </summary>
         public WebSocketServer()
-            : base(new System.Collections.Generic.List<SuperWebSocket.SubProtocol.ISubProtocol<WebSocketSession>>()) { subCommands = CreateSubClass<SubCommandBaseByte>(System.AppDomain.CurrentDomain.GetAssemblies()); base.NewDataReceived += WebSocketServer_NewDataReceived; }
+            : base(new System.Collections.Generic.List<SuperSocket.WebSocket.SubProtocol.ISubProtocol<WebSocketSession>>()) { subCommands = CreateSubClass<SubCommandBaseByte>(System.AppDomain.CurrentDomain.GetAssemblies()); base.NewDataReceived += WebSocketServer_NewDataReceived; }
 
         public delegate void SessionHandler<TAppSession, TParam, TParam1, TParam2>(TAppSession session, TParam key, TParam1 token, TParam2 data)
         where TAppSession : SuperSocket.SocketBase.IAppSession;
         public new event SessionHandler<WebSocketSession, string, string, byte[]> NewDataReceived;
 
-        unsafe void WebSocketServer_NewDataReceived(WebSocketSession session, byte[] data)
+        void WebSocketServer_NewDataReceived(WebSocketSession session, byte[] data)
         {
             if (0 == data.Length) { return; }
             // key length
@@ -80,7 +80,7 @@
             return subInstance;
         }
     }
-    public class SubRequestInfoByte : SuperSocket.SocketBase.Protocol.RequestInfo<byte[]>, SuperWebSocket.SubProtocol.ISubRequestInfo
+    public class SubRequestInfoByte : SuperSocket.SocketBase.Protocol.RequestInfo<byte[]>, SuperSocket.WebSocket.SubProtocol.ISubRequestInfo
     {
         /// <summary>
         /// Gets the token of this request, used for callback
@@ -104,7 +104,7 @@
     /// </summary>
     /// <typeparam name="TWebSocketSession">The type of the web socket session.</typeparam>
     public interface ISubCommandByte<TWebSocketSession> : SuperSocket.SocketBase.Command.ICommand
-        where TWebSocketSession : SuperWebSocket.WebSocketSession<TWebSocketSession>, new()
+        where TWebSocketSession : SuperSocket.WebSocket.WebSocketSession<TWebSocketSession>, new()
     {
         /// <summary>
         /// Executes the command.
@@ -122,8 +122,8 @@
     /// SubCommand base
     /// </summary>
     /// <typeparam name="TWebSocketSession">The type of the web socket session.</typeparam>
-    public abstract class SubCommandBaseByte<TWebSocketSession> : ISubCommandByte<TWebSocketSession>, SuperWebSocket.SubProtocol.ISubCommandFilterLoader
-        where TWebSocketSession : SuperWebSocket.WebSocketSession<TWebSocketSession>, new()
+    public abstract class SubCommandBaseByte<TWebSocketSession> : ISubCommandByte<TWebSocketSession>, SuperSocket.WebSocket.SubProtocol.ISubCommandFilterLoader
+        where TWebSocketSession : SuperSocket.WebSocket.WebSocketSession<TWebSocketSession>, new()
     {
         #region ISubCommand Members
 
@@ -179,18 +179,18 @@
 
         #endregion
 
-        private SuperWebSocket.SubProtocol.SubCommandFilterAttribute[] m_Filters;
+        private SuperSocket.WebSocket.SubProtocol.SubCommandFilterAttribute[] m_Filters;
 
-        void SuperWebSocket.SubProtocol.ISubCommandFilterLoader.LoadSubCommandFilters(System.Collections.Generic.IEnumerable<SuperWebSocket.SubProtocol.SubCommandFilterAttribute> globalFilters)
+        void SuperSocket.WebSocket.SubProtocol.ISubCommandFilterLoader.LoadSubCommandFilters(System.Collections.Generic.IEnumerable<SuperSocket.WebSocket.SubProtocol.SubCommandFilterAttribute> globalFilters)
         {
-            var filters = new System.Collections.Generic.List<SuperWebSocket.SubProtocol.SubCommandFilterAttribute>();
+            var filters = new System.Collections.Generic.List<SuperSocket.WebSocket.SubProtocol.SubCommandFilterAttribute>();
 
             if (globalFilters.Any())
             {
                 filters.AddRange(globalFilters);
             }
 
-            var commandFilters = this.GetType().GetCustomAttributes(true).OfType<SuperWebSocket.SubProtocol.SubCommandFilterAttribute>().ToArray();
+            var commandFilters = this.GetType().GetCustomAttributes(true).OfType<SuperSocket.WebSocket.SubProtocol.SubCommandFilterAttribute>().ToArray();
 
             if (commandFilters.Any())
             {

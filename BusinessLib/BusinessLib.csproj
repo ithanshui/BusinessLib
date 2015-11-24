@@ -91,17 +91,21 @@
     <Reference Include="SharpCompress">
       <HintPath>..\packages\p3-sharpcompress.0.10.5.2\lib\net40\SharpCompress.dll</HintPath>
     </Reference>
-    <Reference Include="SuperSocket.Common">
-      <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.Common.dll</HintPath>
+    <Reference Include="SuperSocket.Common, Version=1.6.5.0, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>..\packages\SuperSocket.1.6.5\lib\net45\SuperSocket.Common.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SuperSocket.SocketBase">
-      <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketBase.dll</HintPath>
+    <Reference Include="SuperSocket.Facility, Version=1.6.5.0, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>..\packages\SuperSocket.1.6.5\lib\net45\SuperSocket.Facility.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SuperSocket.SocketEngine">
-      <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketEngine.dll</HintPath>
+    <Reference Include="SuperSocket.SocketBase, Version=1.6.5.0, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>..\packages\SuperSocket.1.6.5\lib\net45\SuperSocket.SocketBase.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SuperWebSocket">
-      <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperWebSocket.dll</HintPath>
+    <Reference Include="SuperSocket.WebSocket, Version=1.6.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SuperSocket.WebSocket.1.6.5\lib\net45\SuperSocket.WebSocket.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -124,17 +128,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicAuthentication\Attributes.cs" />
-    <Compile Include="BasicAuthentication\InterceptorBase.cs" />
-    <Compile Include="BasicAuthentication\InterceptorNot.cs" />
-    <Compile Include="BasicAuthentication\ITokenNot.cs" />
-    <Compile Include="BasicAuthentication\RoleCompetence.cs" />
-    <Compile Include="BasicAuthentication\Session.cs" />
-    <Compile Include="BasicAuthentication\ISession.cs" />
-    <Compile Include="BasicAuthentication\Interceptor.cs" />
-    <Compile Include="BasicAuthentication\IToken.cs" />
-    <Compile Include="BasicAuthentication\Token.cs" />
-    <Compile Include="BasicAuthentication\TokenNot.cs" />
+    <Compile Include="Authentication\Attributes.cs" />
+    <Compile Include="Authentication\Interceptor.cs" />
+    <Compile Include="Authentication\InterceptorBase.cs" />
+    <Compile Include="Authentication\InterceptorNot.cs" />
+    <Compile Include="Authentication\ISession.cs" />
+    <Compile Include="Authentication\IToken.cs" />
+    <Compile Include="Authentication\ITokenNot.cs" />
+    <Compile Include="Authentication\RoleCompetence.cs" />
+    <Compile Include="Authentication\Session.cs" />
+    <Compile Include="Authentication\Token.cs" />
+    <Compile Include="Authentication\TokenNot.cs" />
     <Compile Include="Data\LinqToDBConnection.cs" />
     <Compile Include="Entity\LinqToDBEntity.cs" />
     <Compile Include="Extensions\cmstar.RapidReflection\Emit\ConstructorInvokerGenerator.cs" />
@@ -180,7 +184,6 @@
     <Compile Include="Mail\IMail.cs" />
     <Compile Include="Mail\MailBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Result\ResultRedis.cs" />
     <Compile Include="SuperWebSocket\WebSocketServer.cs" />
     <Compile Include="SuperWebSocket\WebSocketSession.cs" />
     <Compile Include="Template.cs">

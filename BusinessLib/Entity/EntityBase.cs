@@ -5,6 +5,7 @@ namespace BusinessLib.Entity
     public abstract class EntityBase
     {
         public static readonly System.Collections.Generic.Dictionary<string, Member> MetaData;
+
         static EntityBase()
         {
             MetaData = new System.Collections.Generic.Dictionary<string, Member>();
@@ -144,11 +145,11 @@ namespace BusinessLib.Entity
             public System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> MemberAccessor { get { return memberAccessor; } }
         }
 
-        //[Newtonsoft.Json.JsonIgnore]
         public abstract System.String gid { get; set; }
 
         public abstract System.DateTime dtt { get; set; }
 
+        //[Newtonsoft.Json.JsonIgnore]
         public abstract System.Boolean hide { get; set; }
     }
 }

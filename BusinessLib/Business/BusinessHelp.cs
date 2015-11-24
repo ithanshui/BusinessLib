@@ -33,7 +33,7 @@ namespace BusinessLib.Business
             {
                 //========================== session begin //==========================//
                 if (System.String.IsNullOrEmpty(value)) { return System.String.Empty; }
-                var session = JsonConvert.DeserializeObject<BusinessLib.BasicAuthentication.Session>(value);
+                var session = JsonConvert.DeserializeObject<BusinessLib.Authentication.Session>(value);
 
                 //check time
                 /*
@@ -176,21 +176,21 @@ namespace BusinessLib.Business
         public static Result.IResult Logout(string token, BusinessLib.Cache.ICache cache)
         {
             var _token = token.GetToken();
-            if (null == _token) { return ResultExtensions.Result(MarkEnum.Exp_SessionIllegal); }
+            if (null == _token) { return ResultFactory.Create(MarkEnum.Exp_SessionIllegal); }
 
             cache.Remove(_token.Key);
-            return ResultExtensions.Result("OK");
+            return null;// ResultFactory.Create("OK");
         }
 
-        public static BusinessLib.BasicAuthentication.ITokenNot GetTokenNot(this string token)
+        public static BusinessLib.Authentication.ITokenNot GetTokenNot(this string token)
         {
             if (System.String.IsNullOrEmpty(token))
             {
                 return null;
             }
 
-            var _token = Help.JsonDeserialize<BusinessLib.BasicAuthentication.TokenNot>(token);
-            if (default(BusinessLib.BasicAuthentication.TokenNot).Equals(_token))
+            var _token = Help.JsonDeserialize<BusinessLib.Authentication.TokenNot>(token);
+            if (default(BusinessLib.Authentication.TokenNot).Equals(_token))
             {
                 return null;
             }
@@ -198,15 +198,15 @@ namespace BusinessLib.Business
             return _token;
         }
 
-        public static BusinessLib.BasicAuthentication.IToken GetToken(this string token)
+        public static BusinessLib.Authentication.IToken GetToken(this string token)
         {
             if (System.String.IsNullOrEmpty(token))
             {
                 return null;
             }
 
-            var _token = Help.JsonDeserialize<BusinessLib.BasicAuthentication.Token>(token);
-            if (default(BusinessLib.BasicAuthentication.Token).Equals(_token))
+            var _token = Help.JsonDeserialize<BusinessLib.Authentication.Token>(token);
+            if (default(BusinessLib.Authentication.Token).Equals(_token))
             {
                 return null;
             }
@@ -214,9 +214,9 @@ namespace BusinessLib.Business
             return _token;
         }
 
-        public static BusinessLib.BasicAuthentication.ISession GetSession(this BusinessLib.BasicAuthentication.IToken token, BusinessLib.Cache.ICache cache)
+        public static BusinessLib.Authentication.ISession GetSession(this BusinessLib.Authentication.IToken token, BusinessLib.Cache.ICache cache)
         {//<BusinessLib.BasicAuthentication.Session>
-            return null == token ? null : cache.Get(token.Key) as BusinessLib.BasicAuthentication.ISession;
+            return null == token ? null : cache.Get(token.Key) as BusinessLib.Authentication.ISession;
         }
         //-----------------------------?????????????????????
         //public static BusinessLib.BasicAuthentication.ISession GetSession(this string token, BusinessLib.Cache.ICache cache)
@@ -224,14 +224,14 @@ namespace BusinessLib.Business
         //    var _token = token.GetToken();
         //    return null == _token ? null : _token.GetSession(cache);
         //}
-        public static void SetSession(this BusinessLib.Cache.ICache cache, BusinessLib.BasicAuthentication.ISession session)
+        public static void SetSession(this BusinessLib.Cache.ICache cache, BusinessLib.Authentication.ISession session)
         {
             cache.Set(session.Key, session, TimeSpan.FromMinutes(MarkBase.GetObject<int>(MarkEnum.OutTime_Session_Time)));
         }
 
-        public static BusinessLib.BasicAuthentication.IToken GetToken(string value, string ip)
+        public static BusinessLib.Authentication.IToken GetToken(string value, string ip)
         {
-            return value.JsonDeserialize<BusinessLib.BasicAuthentication.IToken>() ?? new BusinessLib.BasicAuthentication.Token { Key = value, IP = ip };
+            return value.JsonDeserialize<BusinessLib.Authentication.IToken>() ?? new BusinessLib.Authentication.Token { Key = value, IP = ip };
         }
 
         public static string SysInfoDecode(string data)
@@ -240,7 +240,7 @@ namespace BusinessLib.Business
             {
                 var decode = System.Text.Encoding.UTF8.GetString(BusinessLib.Extensions.Help.RSADecrypt(System.Convert.FromBase64String(data)));
                 //sysinfo
-                var sysInfo = BusinessLib.Extensions.Help.JsonDeserialize<BusinessLib.BasicAuthentication.SysInfo>(decode);
+                var sysInfo = BusinessLib.Extensions.Help.JsonDeserialize<BusinessLib.Authentication.SysInfo>(decode);
                 return sysInfo.ToString();
             }
             catch (System.Exception ex)
@@ -362,7 +362,7 @@ namespace BusinessLib.Business
         }
         */
 
-        public static void GetRoleCompetence(System.Collections.Specialized.ListDictionary entitys, string accountKey, ref BusinessLib.BasicAuthentication.RoleCompetence roleCompetence, out List<BusinessLib.BasicAuthentication.Accounts> accountAll, out List<BusinessLib.BasicAuthentication.RoleCompetence> roleCompetencAll)
+        public static void GetRoleCompetence(System.Collections.Specialized.ListDictionary entitys, string accountKey, ref BusinessLib.Authentication.RoleCompetence roleCompetence, out List<BusinessLib.Authentication.Accounts> accountAll, out List<BusinessLib.Authentication.RoleCompetence> roleCompetencAll)
         {
             #region RoleCompetence
             /*
@@ -385,21 +385,21 @@ GROUP BY Competence.competence
                 entitys[MarkBase.GetObject<string>(MarkEnum.R_SysCompetence)] as List<Entity.SysCompetence>);
 
             //competences
-            if (roleCompetenceView.Exists(c => !System.String.IsNullOrEmpty(c.competence_gid))) { roleCompetence.CompetenceAll = new List<BasicAuthentication.Competences>(); }
+            if (roleCompetenceView.Exists(c => !System.String.IsNullOrEmpty(c.competence_gid))) { roleCompetence.CompetenceAll = new List<Authentication.Competences>(); }
             //role
             var _roles = roleCompetenceView.Where(r => !System.String.IsNullOrEmpty(r.role_gid)).GroupBy(g => g.role_gid);
-            if (0 < _roles.Count()) { roleCompetence.Roles = new List<BasicAuthentication.Roles>(); roleCompetence.RoleAll = new List<BasicAuthentication.Roles>(); }
+            if (0 < _roles.Count()) { roleCompetence.Roles = new List<Authentication.Roles>(); roleCompetence.RoleAll = new List<Authentication.Roles>(); }
             foreach (var item in _roles)
             {
                 var _role = roleCompetenceView.Find(r => item.Key == r.role_gid);
-                var role = new BasicAuthentication.Roles { SysAccount_Role_gid = _role.account_Role_gid, CreateKey = _role.role_account, AccountKey = accountKey, Key = item.Key, Parent = _role.role_parent, Role = _role.role, Descrip = _role.role_describe };//IsChild
+                var role = new Authentication.Roles { SysAccount_Role_gid = _role.account_Role_gid, CreateKey = _role.role_account, AccountKey = accountKey, Key = item.Key, Parent = _role.role_parent, Role = _role.role, Descrip = _role.role_describe };//IsChild
                 //competence
                 var competences = item.Where(c => !System.String.IsNullOrEmpty(c.competence_gid)).GroupBy(g => g.role_Competence_gid);
-                if (0 < competences.Count()) { role.Competences = new List<BasicAuthentication.Competences>(); }
+                if (0 < competences.Count()) { role.Competences = new List<Authentication.Competences>(); }
                 foreach (var item1 in competences)
                 {
                     var _competence = roleCompetenceView.Find(r => item1.Key == r.role_Competence_gid);
-                    var competence = new BasicAuthentication.Competences { Role_Competence_gid = _competence.role_Competence_gid, Role = _competence.role_gid, Key = _competence.competence_gid, Parent = _competence.competence_parent, Competence = _competence.competence, Descrip = _competence.competence_describe };
+                    var competence = new Authentication.Competences { Role_Competence_gid = _competence.role_Competence_gid, Role = _competence.role_gid, Key = _competence.competence_gid, Parent = _competence.competence_parent, Competence = _competence.competence, Descrip = _competence.competence_describe };
                     role.Competences.Add(competence);
                     roleCompetence.CompetenceAll.Add(competence);
                 }
@@ -407,30 +407,30 @@ GROUP BY Competence.competence
                 roleCompetence.Roles.Add(role);
                 roleCompetence.RoleAll.Add(role);
             }
-            accountAll = new List<BasicAuthentication.Accounts>();
-            roleCompetencAll = new List<BasicAuthentication.RoleCompetence>();
+            accountAll = new List<Authentication.Accounts>();
+            roleCompetencAll = new List<Authentication.RoleCompetence>();
             //account
             var _accounts = sysAccount.Where(a => accountKey == a.parent);
             if (0 < _accounts.Count())
             {
-                roleCompetence.RoleCompetences = new List<BasicAuthentication.RoleCompetence>();
-                roleCompetence.Account = new BasicAuthentication.Accounts { Parent = roleCompetence.Account.Parent, Key = roleCompetence.Account.Key, Account = roleCompetence.Account.Account, IsChild = true };//IsChild
+                roleCompetence.RoleCompetences = new List<Authentication.RoleCompetence>();
+                roleCompetence.Account = new Authentication.Accounts { Parent = roleCompetence.Account.Parent, Key = roleCompetence.Account.Key, Account = roleCompetence.Account.Account, IsChild = true };//IsChild
                 //roleCompetence.AccountAll = new List<BasicAuthentication.Accounts> { roleCompetence.Account };
                 //roleCompetence.RoleCompetenceAll = new List<BasicAuthentication.RoleCompetence> { roleCompetence };
-                roleCompetence.AccountAll = new List<BasicAuthentication.Accounts>();
-                roleCompetence.RoleCompetenceAll = new List<BasicAuthentication.RoleCompetence>();
+                roleCompetence.AccountAll = new List<Authentication.Accounts>();
+                roleCompetence.RoleCompetenceAll = new List<Authentication.RoleCompetence>();
             }
 
             foreach (var item in _accounts)
             {
-                var account = new BasicAuthentication.Accounts { Parent = item.parent, Key = item.gid, Account = item.account };
-                var _roleCompetence = new BusinessLib.BasicAuthentication.RoleCompetence { Account = account };
+                var account = new Authentication.Accounts { Parent = item.parent, Key = item.gid, Account = item.account };
+                var _roleCompetence = new BusinessLib.Authentication.RoleCompetence { Account = account };
                 GetRoleCompetence(entitys, _roleCompetence.Account.Key, ref _roleCompetence, out accountAll, out roleCompetencAll);
                 roleCompetence.RoleCompetences.Add(_roleCompetence);
 
                 if (null != _roleCompetence.RoleAll)
                 {
-                    if (null == roleCompetence.RoleAll) { roleCompetence.RoleAll = new List<BasicAuthentication.Roles>(); }
+                    if (null == roleCompetence.RoleAll) { roleCompetence.RoleAll = new List<Authentication.Roles>(); }
                     roleCompetence.RoleAll.AddRange(_roleCompetence.RoleAll);
                 }
                 //====================Account====================//
@@ -445,11 +445,11 @@ GROUP BY Competence.competence
             #endregion
         }
 
-        public static BusinessLib.BasicAuthentication.RoleCompetence GetRoleCompetence(BusinessLib.Cache.ICache cache, string accountParent, string accountKey, string account)
+        public static BusinessLib.Authentication.RoleCompetence GetRoleCompetence(BusinessLib.Cache.ICache cache, string accountParent, string accountKey, string account)
         {
-            var roleCompetence = new BasicAuthentication.RoleCompetence { Account = new BasicAuthentication.Accounts { Parent = accountParent, Key = accountKey, Account = account } };
-            List<BusinessLib.BasicAuthentication.RoleCompetence> roleCompetencAll;
-            List<BasicAuthentication.Accounts> accountAll;
+            var roleCompetence = new Authentication.RoleCompetence { Account = new Authentication.Accounts { Parent = accountParent, Key = accountKey, Account = account } };
+            List<BusinessLib.Authentication.RoleCompetence> roleCompetencAll;
+            List<Authentication.Accounts> accountAll;
             //get cache
 
             var list = new System.Collections.Specialized.ListDictionary();
@@ -465,12 +465,12 @@ GROUP BY Competence.competence
             return roleCompetence;
         }
 
-        public static void GetRoles(this BusinessLib.BasicAuthentication.RoleCompetence roleCompetence, string roleKey, ref List<BusinessLib.BasicAuthentication.Roles> roles)
+        public static void GetRoles(this BusinessLib.Authentication.RoleCompetence roleCompetence, string roleKey, ref List<BusinessLib.Authentication.Roles> roles)
         {
             if (System.String.IsNullOrEmpty(roleKey)) { return; }
             foreach (var role in roleCompetence.RoleAll.Where(r => roleKey == r.Parent)) { roleCompetence.GetRoles(role.Key, ref roles); roles.Add(role); }
         }
-        public static void GetAccounts(this BusinessLib.BasicAuthentication.RoleCompetence roleCompetence, string accountKey, ref List<BusinessLib.BasicAuthentication.Accounts> accounts)
+        public static void GetAccounts(this BusinessLib.Authentication.RoleCompetence roleCompetence, string accountKey, ref List<BusinessLib.Authentication.Accounts> accounts)
         {
             if (System.String.IsNullOrEmpty(accountKey)) { return; }
             foreach (var account in roleCompetence.AccountAll.Where(a => accountKey == a.Parent)) { roleCompetence.GetAccounts(account.Key, ref accounts); accounts.Add(account); }
@@ -523,18 +523,18 @@ GROUP BY Competence.competence
             return query.ToList();
         }
 
-        public static void UpdateRoleCompetence(this BusinessLib.BasicAuthentication.ISession session, BusinessLib.Cache.ICache cache)
+        public static void UpdateRoleCompetence(this BusinessLib.Authentication.ISession session, BusinessLib.Cache.ICache cache)
         {
             session.RoleCompetence = GetRoleCompetence(cache, session.RoleCompetence.Account.Parent, session.RoleCompetence.Account.Key, session.RoleCompetence.Account.Account);
             cache.SetSession(session);
 
             if (null == session.RoleCompetence.AccountAll) { return; }
 
-            foreach (var item in cache.Where(c => c.Key.StartsWith("Session_") && session.RoleCompetence.Account.Key == ((BusinessLib.BasicAuthentication.ISession)c.Value).RoleCompetence.Account.Parent))
+            foreach (var item in cache.Where(c => c.Key.StartsWith("Session_") && session.RoleCompetence.Account.Key == ((BusinessLib.Authentication.ISession)c.Value).RoleCompetence.Account.Parent))
             {
                 if (!default(System.Collections.Generic.KeyValuePair<string, object>).Equals(item))
                 {
-                    ((BusinessLib.BasicAuthentication.ISession)item.Value).UpdateRoleCompetence(cache);
+                    ((BusinessLib.Authentication.ISession)item.Value).UpdateRoleCompetence(cache);
                 }
             }
         }
@@ -544,22 +544,22 @@ GROUP BY Competence.competence
         #region //==========================================================================//
 
         //平级关系展示用 GetAccountAll
-        public static string GetAccountAll(BusinessLib.BasicAuthentication.ISession session)
+        public static string GetAccountAll(BusinessLib.Authentication.ISession session)
         {
-            return ResultExtensions.Result(session.RoleCompetence.AccountAll).ToString();
+            return ResultFactory.Create(session.RoleCompetence.AccountAll).ToString();
         }
         //平级关系展示用 GetRoleCompetenceAll
-        public static string GetRoleCompetenceAll(BusinessLib.BasicAuthentication.ISession session)
+        public static string GetRoleCompetenceAll(BusinessLib.Authentication.ISession session)
         {
-            return ResultExtensions.Result(session.RoleCompetence.RoleCompetenceAll).ToString();
+            return ResultFactory.Create(session.RoleCompetence.RoleCompetenceAll).ToString();
         }
 
-        public static string GetAccountRoot(BusinessLib.BasicAuthentication.ISession session)
+        public static string GetAccountRoot(BusinessLib.Authentication.ISession session)
         {
-            return ResultExtensions.Result(session.RoleCompetence.Account).ToString();
+            return ResultFactory.Create(session.RoleCompetence.Account).ToString();
         }
 
-        public static string AddAccount(BusinessLib.BasicAuthentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string parentAccountKey, string account, string password, string securityCode)
+        public static string AddAccount(BusinessLib.Authentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string parentAccountKey, string account, string password, string securityCode)
         {
             if (System.String.IsNullOrEmpty(parentAccountKey)) { throw new ArgumentNullException("parentAccountKey"); }
             if (System.String.IsNullOrEmpty(account)) { throw new ArgumentNullException("account"); }
@@ -576,17 +576,17 @@ GROUP BY Competence.competence
 
             session.UpdateRoleCompetence(cache);
 
-            return ResultExtensions.Result("OK").ToString();
+            return ResultFactory.Create("OK").ToString();
         }
 
-        public static string DelAccount(BusinessLib.BasicAuthentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string accountKey)
+        public static string DelAccount(BusinessLib.Authentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string accountKey)
         {
             if (System.String.IsNullOrEmpty(accountKey)) { throw new ArgumentNullException("accountKey"); }
 
-            if (null == session.RoleCompetence.RoleCompetenceAll) { return ResultExtensions.Result(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
+            if (null == session.RoleCompetence.RoleCompetenceAll) { return ResultFactory.Create(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
 
             var roleCompetence = session.RoleCompetence.RoleCompetenceAll.FirstOrDefault(a => accountKey == a.Account.Key);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.RoleCompetence), roleCompetence)) { return ResultExtensions.Result(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
+            if (System.Object.Equals(default(BusinessLib.Authentication.RoleCompetence), roleCompetence)) { return ResultFactory.Create(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
 
             using (var con = db.GetConnection())
             {
@@ -595,7 +595,7 @@ GROUP BY Competence.competence
                 {
                     foreach (var item in roleCompetence.RoleAll)
                     {
-                        if (!DelRole(con, session, cache, item.SysAccount_Role_gid)) { ResultExtensions.Result("NO").ToString(); }
+                        if (!DelRole(con, session, cache, item.SysAccount_Role_gid)) { ResultFactory.Create("NO").ToString(); }
                     }
                 }
                 //update cache
@@ -609,26 +609,26 @@ GROUP BY Competence.competence
                 session.UpdateRoleCompetence(cache);
             }
 
-            return ResultExtensions.Result("OK").ToString();
+            return ResultFactory.Create("OK").ToString();
         }
 
-        public static string GetRoles(BusinessLib.BasicAuthentication.ISession session, string accountKey)
+        public static string GetRoles(BusinessLib.Authentication.ISession session, string accountKey)
         {
             if (System.String.IsNullOrEmpty(accountKey)) { throw new ArgumentNullException("accountKey"); }
 
-            return ResultExtensions.Result(GetRoleCompetences(session).FirstOrDefault(a => accountKey == a.Account.Key).Roles).ToString();
+            return ResultFactory.Create(GetRoleCompetences(session).FirstOrDefault(a => accountKey == a.Account.Key).Roles).ToString();
         }
 
-        public static string AddRole(BusinessLib.BasicAuthentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string accountKey, string parentRole, string role, string descrip)
+        public static string AddRole(BusinessLib.Authentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string accountKey, string parentRole, string role, string descrip)
         {
             if (System.String.IsNullOrEmpty(accountKey)) { throw new ArgumentNullException("accountKey"); }
             if (System.String.IsNullOrEmpty(parentRole)) { throw new ArgumentNullException("parentRole"); }
             if (System.String.IsNullOrEmpty(role)) { throw new ArgumentNullException("role"); }
 
             var roleCompetence = GetRoleCompetences(session).FirstOrDefault(a => accountKey == a.Account.Key);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.RoleCompetence), roleCompetence)) { return ResultExtensions.Result(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
+            if (System.Object.Equals(default(BusinessLib.Authentication.RoleCompetence), roleCompetence)) { return ResultFactory.Create(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
 
-            if (!roleCompetence.Roles.Exists(r => parentRole == r.Key)) { return ResultExtensions.Result(MarkEnum.Exp_RoleNotExist).ToString(); }
+            if (!roleCompetence.Roles.Exists(r => parentRole == r.Key)) { return ResultFactory.Create(MarkEnum.Exp_RoleNotExist).ToString(); }
 
             using (var con = db.GetConnection())
             {
@@ -655,30 +655,30 @@ GROUP BY Competence.competence
 
             session.UpdateRoleCompetence(cache);
 
-            return ResultExtensions.Result("OK").ToString();
+            return ResultFactory.Create("OK").ToString();
         }
 
-        public static string GetAccountChild(BusinessLib.BasicAuthentication.ISession session, string accountKey)
+        public static string GetAccountChild(BusinessLib.Authentication.ISession session, string accountKey)
         {
             if (System.String.IsNullOrEmpty(accountKey)) { throw new ArgumentNullException("accountKey"); }
 
             var accounts = GetRoleCompetences(session).FirstOrDefault(a => accountKey == a.Account.Key).AccountAll;
 
-            return ResultExtensions.Result(null == accounts ? accounts : accounts.Where(a => accountKey == a.Parent)).ToString();
+            return ResultFactory.Create(null == accounts ? accounts : accounts.Where(a => accountKey == a.Parent)).ToString();
         }
 
-        public static string SetRole(BusinessLib.BasicAuthentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string parentAccountKey, string[] roleKeys, string setAccountKey)
+        public static string SetRole(BusinessLib.Authentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string parentAccountKey, string[] roleKeys, string setAccountKey)
         {
             if (System.String.IsNullOrEmpty(parentAccountKey)) { throw new ArgumentNullException("parentAccountKey"); }
             if (null == roleKeys) { throw new ArgumentNullException("roleKeys"); }
             if (System.String.IsNullOrEmpty(setAccountKey)) { throw new ArgumentNullException("setAccountKey"); }
 
             var roleCompetence = GetRoleCompetences(session).FirstOrDefault(a => parentAccountKey == a.Account.Key);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.RoleCompetence), roleCompetence)) { return ResultExtensions.Result(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
+            if (System.Object.Equals(default(BusinessLib.Authentication.RoleCompetence), roleCompetence)) { return ResultFactory.Create(MarkEnum.Exp_RoleCompetenceNotExist).ToString(); }
 
-            if (!roleCompetence.AccountAll.Exists(a => setAccountKey == a.Key)) { return ResultExtensions.Result(MarkEnum.Exp_AccountNotExist).ToString(); }
+            if (!roleCompetence.AccountAll.Exists(a => setAccountKey == a.Key)) { return ResultFactory.Create(MarkEnum.Exp_AccountNotExist).ToString(); }
 
-            if (!roleCompetence.Roles.Exists(r => roleKeys.Contains(r.Key))) { return ResultExtensions.Result(MarkEnum.Exp_RoleNotExist).ToString(); }
+            if (!roleCompetence.Roles.Exists(r => roleKeys.Contains(r.Key))) { return ResultFactory.Create(MarkEnum.Exp_RoleNotExist).ToString(); }
 
             var sysAccount_Role_Name = MarkBase.GetObject<string>(MarkEnum.R_SysAccount_Role);
             using (var con = db.GetConnection())
@@ -704,10 +704,10 @@ GROUP BY Competence.competence
                 session.UpdateRoleCompetence(cache);
             }
 
-            return ResultExtensions.Result("OK").ToString();
+            return ResultFactory.Create("OK").ToString();
         }
 
-        public static string DelRole(BusinessLib.BasicAuthentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string sysAccount_Role_Key)
+        public static string DelRole(BusinessLib.Authentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string sysAccount_Role_Key)
         {
             if (System.String.IsNullOrEmpty(sysAccount_Role_Key)) { throw new ArgumentNullException("sysAccount_Role_Key"); }
 
@@ -720,13 +720,13 @@ GROUP BY Competence.competence
                     session.UpdateRoleCompetence(cache);
                 }
             }
-            return ResultExtensions.Result("OK").ToString();
+            return ResultFactory.Create("OK").ToString();
         }
 
-        static bool DelRole(BusinessLib.Data.IConnection con, BusinessLib.BasicAuthentication.ISession session, BusinessLib.Cache.ICache cache, string sysAccount_Role_Key)
+        static bool DelRole(BusinessLib.Data.IConnection con, BusinessLib.Authentication.ISession session, BusinessLib.Cache.ICache cache, string sysAccount_Role_Key)
         {
             var role = session.RoleCompetence.RoleAll.FirstOrDefault(r => sysAccount_Role_Key == r.SysAccount_Role_gid);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.Roles), role)) { return false; }
+            if (System.Object.Equals(default(BusinessLib.Authentication.Roles), role)) { return false; }
             //CreateKey
             //var isCreateKey = session.RoleCompetence.Account.Key.Equals(role.CreateKey);
             //if (!isCreateKey) { return new BusinessLib.Business.Result(-39).ToString(); }
@@ -734,7 +734,7 @@ GROUP BY Competence.competence
             //var isAccountKey = session.RoleCompetence.Account.Key.Equals(role.AccountKey);
 
             var roleCompetence = GetRoleCompetences(session).FirstOrDefault(a => role.AccountKey == a.Account.Key);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.RoleCompetence), roleCompetence)) { return false; }
+            if (System.Object.Equals(default(BusinessLib.Authentication.RoleCompetence), roleCompetence)) { return false; }
 
             //roles
             var roles = roleCompetence.RoleAll.Where(r => role.Key == r.Key).ToList();
@@ -829,32 +829,32 @@ GROUP BY Competence.competence
             return false;
         }
 
-        public static string GetRoleAll(BusinessLib.BasicAuthentication.ISession session, string accountKey)
+        public static string GetRoleAll(BusinessLib.Authentication.ISession session, string accountKey)
         {
             if (System.String.IsNullOrEmpty(accountKey)) { throw new ArgumentNullException("accountKey"); }
 
             var roleCompetence = GetRoleCompetences(session).FirstOrDefault(a => accountKey == a.Account.Key);
-            return ResultExtensions.Result(roleCompetence.RoleAll).ToString();
+            return ResultFactory.Create(roleCompetence.RoleAll).ToString();
         }
 
-        static System.Collections.Generic.IEnumerable<BusinessLib.BasicAuthentication.RoleCompetence> GetRoleCompetences(BusinessLib.BasicAuthentication.ISession session)
+        static System.Collections.Generic.IEnumerable<BusinessLib.Authentication.RoleCompetence> GetRoleCompetences(BusinessLib.Authentication.ISession session)
         {
-            return null == session.RoleCompetence.RoleCompetenceAll ? new List<BusinessLib.BasicAuthentication.RoleCompetence> { session.RoleCompetence } : session.RoleCompetence.RoleCompetenceAll.Concat(new List<BusinessLib.BasicAuthentication.RoleCompetence> { session.RoleCompetence });
+            return null == session.RoleCompetence.RoleCompetenceAll ? new List<BusinessLib.Authentication.RoleCompetence> { session.RoleCompetence } : session.RoleCompetence.RoleCompetenceAll.Concat(new List<BusinessLib.Authentication.RoleCompetence> { session.RoleCompetence });
         }
 
-        public static string SetCompetence(BusinessLib.BasicAuthentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string roleKey, string[] competenceKeys)
+        public static string SetCompetence(BusinessLib.Authentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string roleKey, string[] competenceKeys)
         {
             if (System.String.IsNullOrEmpty(roleKey)) { throw new ArgumentNullException("roleKey"); }
             if (null == competenceKeys) { throw new ArgumentNullException("competenceKeys"); }
 
             var role = session.RoleCompetence.RoleAll.FirstOrDefault(r => roleKey == r.Key);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.Roles), role)) { return ResultExtensions.Result(MarkEnum.Exp_RoleNotExist).ToString(); }
+            if (System.Object.Equals(default(BusinessLib.Authentication.Roles), role)) { return ResultFactory.Create(MarkEnum.Exp_RoleNotExist).ToString(); }
             var parentRole = session.RoleCompetence.RoleAll.FirstOrDefault(r => role.Parent == r.Key);
-            var isParentRole = !System.Object.Equals(default(BusinessLib.BasicAuthentication.Roles), parentRole);
+            var isParentRole = !System.Object.Equals(default(BusinessLib.Authentication.Roles), parentRole);
 
-            if (!System.String.IsNullOrEmpty(role.Parent) && !isParentRole) { return ResultExtensions.Result(MarkEnum.Exp_RoleNotExist).ToString(); }
+            if (!System.String.IsNullOrEmpty(role.Parent) && !isParentRole) { return ResultFactory.Create(MarkEnum.Exp_RoleNotExist).ToString(); }
 
-            if (isParentRole && (null == parentRole.Competences || !parentRole.Competences.Exists(c => competenceKeys.Contains(c.Key)))) { return ResultExtensions.Result(MarkEnum.Exp_CompetenceNotExist).ToString(); }
+            if (isParentRole && (null == parentRole.Competences || !parentRole.Competences.Exists(c => competenceKeys.Contains(c.Key)))) { return ResultFactory.Create(MarkEnum.Exp_CompetenceNotExist).ToString(); }
 
             using (var con = db.GetConnection())
             {
@@ -879,25 +879,25 @@ GROUP BY Competence.competence
                 session.UpdateRoleCompetence(cache);
             }
 
-            return ResultExtensions.Result("OK").ToString();
+            return ResultFactory.Create("OK").ToString();
         }
 
-        public static string DelCompetence(BusinessLib.BasicAuthentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string roleKey, string[] role_Competence_Key)
+        public static string DelCompetence(BusinessLib.Authentication.ISession session, BusinessLib.Data.IData db, BusinessLib.Cache.ICache cache, string roleKey, string[] role_Competence_Key)
         {
             if (System.String.IsNullOrEmpty(roleKey)) { throw new ArgumentNullException("roleKey"); }
             if (null == role_Competence_Key) { throw new ArgumentNullException("role_Competence_Key"); }
 
             var role = session.RoleCompetence.RoleAll.FirstOrDefault(r => roleKey == r.Key);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.Roles), role)) { return ResultExtensions.Result(MarkEnum.Exp_RoleNotExist).ToString(); }
+            if (System.Object.Equals(default(BusinessLib.Authentication.Roles), role)) { return ResultFactory.Create(MarkEnum.Exp_RoleNotExist).ToString(); }
 
-            var roles = new List<BusinessLib.BasicAuthentication.Roles> { role };
+            var roles = new List<BusinessLib.Authentication.Roles> { role };
             session.RoleCompetence.GetRoles(role.Key, ref roles);
 
             var list = new List<Entity.SysRole_Competence>();
             foreach (var item in role_Competence_Key)
             {
                 var competence = session.RoleCompetence.CompetenceAll.FirstOrDefault(c => item == c.Role_Competence_gid);
-                if (System.Object.Equals(default(BusinessLib.BasicAuthentication.Competences), competence)) { return ResultExtensions.Result(MarkEnum.Exp_CompetenceNotExist).ToString(); }
+                if (System.Object.Equals(default(BusinessLib.Authentication.Competences), competence)) { return ResultFactory.Create(MarkEnum.Exp_CompetenceNotExist).ToString(); }
 
                 var _roles = roles.Where(r => null != r.Competences && r.Competences.Exists(c => competence.Key == c.Key)).GroupBy(g => g.Key).Select(s => s.First());
 
@@ -919,17 +919,17 @@ GROUP BY Competence.competence
 
             session.UpdateRoleCompetence(cache);
 
-            return ResultExtensions.Result("OK").ToString();
+            return ResultFactory.Create("OK").ToString();
         }
 
-        public static string GetCompetence(BusinessLib.BasicAuthentication.ISession session, string roleKey)
+        public static string GetCompetence(BusinessLib.Authentication.ISession session, string roleKey)
         {
             if (System.String.IsNullOrEmpty(roleKey)) { throw new ArgumentNullException("roleKey"); }
 
             var role = session.RoleCompetence.RoleAll.FirstOrDefault(r => roleKey == r.Key);
-            if (System.Object.Equals(default(BusinessLib.BasicAuthentication.Roles), role)) { return ResultExtensions.Result(MarkEnum.Exp_RoleNotExist).ToString(); }
+            if (System.Object.Equals(default(BusinessLib.Authentication.Roles), role)) { return ResultFactory.Create(MarkEnum.Exp_RoleNotExist).ToString(); }
 
-            return ResultExtensions.Result(role.Competences).ToString();
+            return ResultFactory.Create(role.Competences).ToString();
         }
 
         //========================================================================//

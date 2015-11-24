@@ -1,10 +1,11 @@
-namespace BusinessLib.BasicAuthentication
+namespace BusinessLib.Authentication
 {
     using BusinessLib.Extensions;
     using BusinessLib.Result;
     using BusinessLib.Mark;
 
-    public sealed class Interceptor : InterceptorBase
+    public sealed class Interceptor<Result> : InterceptorBase, IInterceptorMetaData
+        where Result : class, IResult, new()
     {
         public Interceptor(BusinessLib.Log.ILog log, BusinessLib.Cache.ICache cache, bool isLogRecord = true)
             : base(log, cache, isLogRecord: isLogRecord) { }
@@ -25,12 +26,13 @@ namespace BusinessLib.BasicAuthentication
                 if (0 == arguments.Length)
                 {
                     arguments = null;
-                    invocation.ReturnValue = ResultExtensions.Result(MarkEnum.Exp_ArgumentsIllegal); logType = BusinessLib.Log.LogType.Exception; return;
+
+                    invocation.ReturnValue = ResultFactory.Create<Result>(MarkEnum.Exp_ArgumentsIllegal); logType = BusinessLib.Log.LogType.Exception; return;
                 }
 
-                IResult error;
+                Result error;
 
-                session = Interceptor.CheckSession(System.Convert.ToString(arguments[0]), cache, out error);
+                session = CheckSession(System.Convert.ToString(arguments[0]), cache, out error);
 
                 if (null == session)
                 {
@@ -38,7 +40,7 @@ namespace BusinessLib.BasicAuthentication
                 }
 
                 // check competence
-                if (!Interceptor.CheckCompetence(session, cache, method, out error))
+                if (!CheckCompetence(session, cache, method, out error))
                 {
                     invocation.ReturnValue = error; logType = BusinessLib.Log.LogType.Exception; return;
                 }
@@ -51,17 +53,17 @@ namespace BusinessLib.BasicAuthentication
 
                 if (1 < arguments.Length)
                 {
-                    var ags = null == arguments[1] ? System.String.Empty : System.Convert.ToString(arguments[1]);
-                    if (!System.String.IsNullOrEmpty(ags))
+                    //var ags = null == arguments[1] ? System.String.Empty : System.Convert.ToString(arguments[1]);
+                    if (null != arguments[1])
                     {
                         // set ags
                         if (-1 < i)
                         {
-                            arguments[i] = Newtonsoft.Json.JsonConvert.DeserializeObject(ags, meta.Arguments.Item2);
+                            arguments[i] = Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(arguments[1]), meta.Arguments.Item2);
 
                             #region check ags
                             //check ags
-                            var result = CheckAgsJson(meta, arguments[i]);
+                            var result = CheckAgs<Result>(meta, arguments[i]);
                             if (null != result)
                             {
                                 invocation.ReturnValue = result;
@@ -80,7 +82,7 @@ namespace BusinessLib.BasicAuthentication
             }
             catch (System.Exception ex)
             {
-                invocation.ReturnValue = ResultExtensions.Result(0, System.Convert.ToString(ex));
+                invocation.ReturnValue = ResultFactory.Create<Result>(0, System.Convert.ToString(ex));
                 logType = BusinessLib.Log.LogType.Exception;
             }
             finally
@@ -126,5 +128,7 @@ namespace BusinessLib.BasicAuthentication
                 }
             }
         }
+
+        public System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> MetaData { get; set; }
     }
 }
