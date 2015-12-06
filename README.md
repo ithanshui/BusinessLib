@@ -4,9 +4,9 @@ NuGet:https://www.nuget.org/packages/BusinessLib/
 
 # This is a Server framework
 
-Please refer to the Template.cs
+# Please refer to the Template.cs
 
-    # Arguments receive the beginning
+# Arguments receive the beginning
     
     [Json]
     public struct Register
