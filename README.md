@@ -3,30 +3,11 @@
 NuGet:https://www.nuget.org/packages/BusinessLib/
 
 # This is a Server framework
+# Please refer to the Template.cs
 
-    public abstract class DataBase<IConnection> : IData, IData2 where IConnection : class, BusinessLib.Data.IConnection
-    public class LogBase : ILog
-    public class CacheBase : ICache, IDictionary<string, object, KeyValuePair<string, object>>, IEnumerable<KeyValuePair<string, object>>, IEnumerable
+# Arguments receive the beginning
     
-//write data
-
-    using (var con = this.DB.GetConnection())
-    {
-        con.BeginTransaction();
-
-        member[0].loginIp = _ip;
-        member[0].loginDtt = time;
-        if (1 == result) { member[0].errorCount = 0; }
-        if (0 == con.Update(member[0])) { con.Rollback(); throw new System.Data.DBConcurrencyException(typeof(SysAccount).Name); }
-        if (-2 != result)//freeze
-        {
-            if (0 == con.Save(new SysLogin { category = 0, session = session, account = _account1, ip = _ip, data = _data, result = result, describe = _error, dtt = time })) { con.Rollback(); throw new System.Data.DBConcurrencyException(typeof(SysLogin).Name); }
-        }
-
-        con.Commit();
-    }
-
-    [Arguments]
+    [Json]
     public struct Register
     {
         [CanNotNull(Code = -11, Message = "\"account\" not is null")]
@@ -35,6 +16,48 @@ NuGet:https://www.nuget.org/packages/BusinessLib/
         public string account;
     }
 
+# IResult end
+
+    public interface IResult
+    {
+        /// <summary>
+        /// The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
+        /// </summary>
+        System.Int32 State { get; set; }
+
+        /// <summary>
+        /// Success can be null
+        /// </summary>
+        System.String Message { get; set; }
+
+        /// <summary>
+        /// Specific Byte/Json data objects
+        /// </summary>
+        dynamic Data { get; }
+
+        /// <summary>
+        /// Json
+        /// </summary>
+        /// <returns></returns>
+        string ToString();
+
+        /// <summary>
+        /// ProtoBuf
+        /// </summary>
+        /// <returns></returns>
+        byte[] ToBytes();
+    }
+
+    public interface IResult<DataType> : IResult
+    {
+        /// <summary>
+        /// Specific Byte/Json data objects
+        /// </summary>
+       new DataType Data { get; set; }
+    }
+    
+# Include session handling
+    
     public interface ISession
     {
         System.String Site { get; set; }
@@ -49,29 +72,4 @@ NuGet:https://www.nuget.org/packages/BusinessLib/
         RoleCompetence RoleCompetence { get; set; }
 
         ISession Clone();
-    }
-
-    public abstract class InterceptorBase : Ninject.Extensions.Interception.IInterceptor
-
-    public InterceptorBase(BusinessLib.Log.ILog log = null, BusinessLib.Cache.ICache cache = null, BusinessLib.Data.IData db = null, bool isLogRecord = true)
-    {
-        this.log = log;
-        this.cache = cache;
-        this.db = db;
-        this.IsLogRecord = isLogRecord;
-    }
-
-    public interface IResult<DataType>
-    {
-        [ProtoBuf.ProtoMember(1, Name = "S")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
-        System.Int32 State { get; set; }
-
-        [ProtoBuf.ProtoMember(2, Name = "M")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
-        System.String Message { get; set; }
-
-        [ProtoBuf.ProtoMember(3, Name = "D")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
-        DataType Data { get; set; }
     }
