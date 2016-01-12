@@ -14,6 +14,13 @@
             Message = message;
         }
 
+        System.Func<object, System.Type, object> deserialize = new System.Func<object, System.Type, object>((ags, type) => { return Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(ags), type); });
+
+        public ResultBase(System.Func<object, System.Type, object> deserialize)
+        {
+            this.deserialize = deserialize;
+        }
+
         /// <summary>
         /// 结果状态 大于等于1：成功，等于0：未捕捉系统级异常，小于0：业务级错误。
         /// </summary>
@@ -44,6 +51,11 @@
         public virtual byte[] ToBytes()
         {
             return BusinessLib.Extensions.Help.ProtoBufSerialize(this);
+        }
+
+        public virtual object Deserialize(object ags, System.Type type)
+        {
+            return deserialize(ags, type);
         }
     }
 

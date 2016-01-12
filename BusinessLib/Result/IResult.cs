@@ -17,6 +17,8 @@
         /// </summary>
         /// <returns></returns>
         byte[] ToBytes();
+
+        object Deserialize(object ags, System.Type type);
     }
 
     public interface IResult<DataType> : IResult

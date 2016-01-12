@@ -159,6 +159,11 @@ namespace Template
         {
             return BusinessLib.Extensions.Help.ProtoBufSerialize(this);
         }
+
+        public object Deserialize(object ags, Type type)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [ProtoBuf.ProtoContract(SkipConstructor = true)]

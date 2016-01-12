@@ -59,7 +59,8 @@ namespace BusinessLib.Authentication
                         // set ags
                         if (-1 < i)
                         {
-                            arguments[i] = Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(arguments[1]), meta.Arguments.Item2);
+                            arguments[i] = new Result().Deserialize(arguments[1], meta.Arguments.Item2);
+                            //arguments[i] = Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(arguments[1]), meta.Arguments.Item2);
 
                             #region check ags
                             //check ags
