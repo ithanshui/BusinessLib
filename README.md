@@ -1,6 +1,6 @@
 # BusinessLib
 
-NuGet:https://www.nuget.org/packages/BusinessLib/
+NuGet:https://www.nuget.org/packages/Business.Lib/
 
 # This is a Server framework
 
@@ -11,15 +11,15 @@ NuGet:https://www.nuget.org/packages/BusinessLib/
     [Json]
     public struct Register
     {
-        [CanNotNull(Code = -11, Message = "\"account\" not is null")]
-        [Size(Min = 4, Max = "8", Code = -12)]
+        [CanNotNull(-11, "\"account\" not is null")]
+        [Size(-12, Min = 4, Max = "8")]
         [CheckChar(Mode = Help.CheckCharMode.All, Code = -13, Message = "\" char account\" verification failed")]
         public string account;
     }
 
 # IResult end
 
-    public interface IResult
+    public interface IResult : Authentication.ISerialize
     {
         /// <summary>
         /// The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
@@ -37,16 +37,16 @@ NuGet:https://www.nuget.org/packages/BusinessLib/
         dynamic Data { get; }
 
         /// <summary>
-        /// Json
+        /// Json Data
         /// </summary>
         /// <returns></returns>
-        string ToString();
+        string ToDataString();
 
         /// <summary>
-        /// ProtoBuf
+        /// ProtoBuf Data
         /// </summary>
         /// <returns></returns>
-        byte[] ToBytes();
+        byte[] ToDataBytes();
     }
 
     public interface IResult<DataType> : IResult
@@ -54,23 +54,30 @@ NuGet:https://www.nuget.org/packages/BusinessLib/
         /// <summary>
         /// Specific Byte/Json data objects
         /// </summary>
-       new DataType Data { get; set; }
+        new DataType Data { get; set; }
     }
     
 # Include session handling
     
-    public interface ISession
+    public interface ISession : ISerialize
     {
         System.String Site { get; set; }
         System.String Account { get; set; }
         System.String Password { get; set; }
-        System.String SecurityCode { get; set; }
 
         System.String Key { get; set; }
         System.String IP { get; set; }
 
         System.DateTime Time { get; set; }
-        RoleCompetence RoleCompetence { get; set; }
+
+        System.Collections.Generic.List<string> Competences { get; set; }
 
         ISession Clone();
+    }
+
+    public interface ISession<DataType> : ISession
+    {
+        new ISession<DataType> Clone();
+
+        DataType Data { get; set; }
     }
