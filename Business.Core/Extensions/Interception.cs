@@ -15,16 +15,7 @@
         }
     }
 
-    //public interface IInterceptorMeta : Castle.DynamicProxy.IInterceptor
-    //{
-    //    Business.IBusiness Business { get; set; }
-
-    //    System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> MetaData { get; set; }
-
-    //    Attributes.SysLogAttribute LogAttr { get; set; }
-    //}
-
-    public class InterceptorBind<T> : System.IDisposable
+    public class InterceptorBind<T> : Authentication.IInterception, System.IDisposable
         where T : class, Business.IBusiness
     {
         readonly BusinessAllMethodsHook hook;
@@ -43,14 +34,12 @@
 
             Instance = ProxyGenerator.CreateClassProxy<T>(new Castle.DynamicProxy.ProxyGenerationOptions(hook), interceptor);
 
-            this.MetaData = GetInterceptorMetaData(notIntercept.Item2, Instance);
-
-            interceptor.MetaData = this.MetaData;
-            interceptor.BusinessLogAttr = LogAttr(type);
-
             this.Command = GetInterceptorCommand(notIntercept.Item2, Instance);
+            this.Business = Instance;
 
-            interceptor.Business = Instance;
+            interceptor.MetaData = GetInterceptorMetaData(notIntercept.Item2);
+            interceptor.Business = this.Business;
+            interceptor.BusinessLogAttr = LogAttr(type);
         }
 
         public void Dispose()
@@ -61,9 +50,9 @@
             }
         }
 
-        public System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> MetaData { get; set; }
-
         public System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> Command { get; set; }
+
+        public IBusiness Business { get; set; }
 
         static System.Tuple<System.Reflection.MethodInfo[], System.Reflection.MethodInfo[]> NotIntercept(System.Reflection.MethodInfo[] methods)
         {
@@ -86,10 +75,19 @@
 
         static Attributes.BusinessLogAttribute LogAttr(System.Reflection.ICustomAttributeProvider member)
         {
-            var logAttr = new Attributes.BusinessLogAttribute();
+            Attributes.BusinessLogAttribute logAttr;
             var logAttrs = GetAttributes<Attributes.BusinessLogAttribute>(member);
-            if (0 < logAttrs.Length) { logAttr = logAttrs[0] as Attributes.BusinessLogAttribute; }
+            logAttr = 0 < logAttrs.Length ? logAttrs[0] : new Attributes.BusinessLogAttribute();
             return logAttr;
+        }
+
+        static Attributes.CommandAttribute CmdAttr(System.Reflection.ICustomAttributeProvider member, string name)
+        {
+            Attributes.CommandAttribute commandAttr = null;
+            var commandAttrs = GetAttributes<Attributes.CommandAttribute>(member);
+            commandAttr = 0 < commandAttrs.Length ? commandAttrs[0] : new Attributes.CommandAttribute(name);
+            if (System.String.IsNullOrEmpty(commandAttr.OnlyName)) { commandAttr.SetOnlyName(name); }
+            return commandAttr;
         }
 
         static object[] GetAgsObj(object[] agsObj, object token, object arguments = null) { agsObj[0] = token; if (1 < agsObj.Length && null != arguments) { agsObj[1] = arguments; } return agsObj; }
@@ -169,7 +167,7 @@
             return (T[])member.GetCustomAttributes(inherit);
         }
 
-        internal System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> GetInterceptorMetaData(System.Reflection.MethodInfo[] methods, object proxy)
+        internal System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> GetInterceptorMetaData(System.Reflection.MethodInfo[] methods)
         {
             var interceptorMetaData = new System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData>();
 
@@ -188,18 +186,20 @@
                     var argumentsAttrs = GetAttributes<Attributes.ArgumentsAttribute>(agsTypes[i2]);
                     if (0 < argumentsAttrs.Length)
                     {
-                        i = i2; agsType = agsTypes[i2]; attr = argumentsAttrs[0] as Attributes.ArgumentsAttribute;
+                        i = i2; agsType = agsTypes[i2]; attr = argumentsAttrs[0];
 
                         var deserializeAttrs = GetAttributes<Attributes.DeserializeAttribute>(agsTypes[i2]);
-                        if (0 < deserializeAttrs.Length) { deserialize = deserializeAttrs[0] as Attributes.DeserializeAttribute; ; }
+                        if (0 < deserializeAttrs.Length) { deserialize = deserializeAttrs[0]; }
                         break;
                     }
                 }
 
                 //======LogAttribute======//
                 Attributes.BusinessLogAttribute logAttr = LogAttr(item);
+                //======CmdAttribute======//
+                Attributes.CommandAttribute commandAttr = CmdAttr(item, item.Name);
 
-                var metaData = new InterceptorMetaData(new System.Func<object, object, Result.IResult>((token, arguments) => cmstar.RapidReflection.Emit.MethodInvokerGenerator.CreateDelegate(proxy.GetType().GetMethod(item.Name), false)(proxy, GetAgsObj(agsObjs, token, arguments)) as Result.IResult), System.Array.FindIndex(agsTypes, p => typeof(Authentication.ISession).IsAssignableFrom(p)), new System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute>(i, agsType, attr, deserialize), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>>(), logAttr, item.GetMethodFullName(), !typeof(void).Equals(item.ReturnType.FullName));
+                var metaData = new InterceptorMetaData(System.Array.FindIndex(agsTypes, p => typeof(Authentication.ISession).IsAssignableFrom(p)), new System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute>(i, agsType, attr, deserialize), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>>(), logAttr, commandAttr, item.GetMethodFullName(), !typeof(void).Equals(item.ReturnType.FullName));
 
                 if (-1 < i)
                 {
@@ -225,7 +225,7 @@
                     foreach (var property in propertys)
                     {
                         var atts = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(GetAttributes<Attributes.ArgumentAttribute>(property));
-                        
+
                         var checkedAtts1 = new System.Collections.Generic.List<Attributes.CheckedAttribute>();
                         var atts1 = new System.Collections.Generic.List<Attributes.ArgumentAttribute>();
                         foreach (var att in atts)
@@ -252,23 +252,14 @@
 
             foreach (var item in methods)
             {
-                var commandAttrs = GetAttributes<Attributes.CommandAttribute>(item);
-                if (0 == commandAttrs.Length) { continue; }
-
-                var name = item.Name;
-
-                var attr = commandAttrs[0] as Attributes.CommandAttribute;
-                if (null != attr.OnlyName && !System.String.IsNullOrEmpty(attr.OnlyName.Trim()))
-                {
-                    name = attr.OnlyName.Trim();
-                }
+                Attributes.CommandAttribute commandAttr = CmdAttr(item, item.Name);
 
                 var parameters = GetParameters(item);
                 var agsObjs = parameters.Item2;
 
-                var command = new InterceptorCommand(new System.Func<object, object, Result.IResult>((token, arguments) => cmstar.RapidReflection.Emit.MethodInvokerGenerator.CreateDelegate(proxy.GetType().GetMethod(item.Name), false)(proxy, GetAgsObj(agsObjs, token, arguments)) as Result.IResult), attr.ResultDataType, !typeof(void).Equals(item.ReturnType.FullName));
+                var command = new InterceptorCommand(new System.Func<object, object, Result.IResult>((token, arguments) => cmstar.RapidReflection.Emit.MethodInvokerGenerator.CreateDelegate(proxy.GetType().GetMethod(item.Name), false)(proxy, GetAgsObj(agsObjs, token, new CommandAgs(arguments))) as Result.IResult), commandAttr.ResultDataType, !typeof(void).Equals(item.ReturnType.FullName));
 
-                if (!interceptorCommand.TryAdd(name, command)) { throw new System.Exception(string.Format("Command Name Exists {0}!", name)); }
+                if (!interceptorCommand.TryAdd(commandAttr.OnlyName, command)) { throw new System.Exception(string.Format("Command Name Exists {0}!", commandAttr.OnlyName)); }
             }
 
             return interceptorCommand;
@@ -277,24 +268,33 @@
 
     #region Meta
 
+    internal struct CommandAgs
+    {
+        public CommandAgs(object ags) { this.ags = ags; }
+
+        object ags;
+        public object Ags { get { return ags; } }
+    }
+
     public struct InterceptorMetaData
     {
-        public InterceptorMetaData(System.Func<object, object, Result.IResult> method, int sessionPosition, System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute> arguments, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> memberAccessor, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>> checkedAtts, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>> argumentAtts, Attributes.BusinessLogAttribute logAttr, string fullName, bool hasReturn)
+        public InterceptorMetaData(int sessionPosition, System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute> arguments, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> memberAccessor, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>> checkedAtts, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>> argumentAtts, Attributes.BusinessLogAttribute logAttr, Attributes.CommandAttribute commandAttr, string fullName, bool hasReturn)
         {
-            this.method = method;
+            //this.method = method;
             this.sessionPosition = sessionPosition;
             this.arguments = arguments;
             this.memberAccessor = memberAccessor;
             this.checkedAtts = checkedAtts;
             this.argumentAtts = argumentAtts;
             this.businessLogAttr = logAttr;
+            this.commandAttr = commandAttr;
             this.fullName = fullName;
             this.hasReturn = hasReturn;
         }
 
-        //===============method==================//
-        readonly System.Func<object, object, Result.IResult> method;
-        public System.Func<object, object, Result.IResult> Method { get { return method; } }
+        ////===============method==================//
+        //readonly System.Func<object, object, Result.IResult> method;
+        //public System.Func<object, object, Result.IResult> Method { get { return method; } }
         //===============session==================//
         readonly int sessionPosition;
         public int SessionPosition { get { return sessionPosition; } }
@@ -313,6 +313,9 @@
         //==============logAttribute===================//
         readonly Attributes.BusinessLogAttribute businessLogAttr;
         public Attributes.BusinessLogAttribute BusinessLogAttr { get { return businessLogAttr; } }
+        //==============cmdAttribute===================//
+        readonly Attributes.CommandAttribute commandAttr;
+        public Attributes.CommandAttribute CommandAttr { get { return commandAttr; } }
         //==============fullName===================//
         readonly string fullName;
         public string FullName { get { return fullName; } }

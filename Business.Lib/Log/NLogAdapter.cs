@@ -2,7 +2,7 @@
 {
     public class NLogAdapter : ILog
     {
-        NLog.ILogger log;
+        readonly NLog.ILogger log;
 
         public NLogAdapter(NLog.ILogger log)
         {

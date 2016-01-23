@@ -5,7 +5,7 @@
     {
         public static implicit operator Session(string value)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Session>(value);
+            return Extensions.Help.JsonDeserialize<Session>(value);
         }
         public static implicit operator Session(byte[] value)
         {
@@ -54,7 +54,7 @@
     {
         public static implicit operator Session<DataType>(string value)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Session<DataType>>(value);
+            return Extensions.Help.JsonDeserialize<Session<DataType>>(value);
         }
         public static implicit operator Session<DataType>(byte[] value)
         {
@@ -82,7 +82,7 @@
         [ProtoBuf.ProtoMember(7)]
         public override System.Collections.Generic.List<string> Competences { get; set; }
 
-        [ProtoBuf.ProtoMember(8, AsReference = true)]
+        [ProtoBuf.ProtoMember(8)]
         public virtual DataType Data { get; set; }
 
         ISession ISession.Clone()

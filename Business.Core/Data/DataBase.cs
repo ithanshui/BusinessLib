@@ -49,23 +49,44 @@ namespace Business.Data
     {
         public DataParameter(string name, object value) { this.name = name; this.value = value; }
 
-        string name;
-        object value;
+        readonly string name;
+        readonly object value;
 
         public string Name { get { return name; } }
 
         public object Value { get { return value; } }
     }
 
-    public class Paging<T>
+    [ProtoBuf.ProtoContract(SkipConstructor = true)]
+    public struct Paging<T> : Authentication.ISerialize
     {
-        public Paging(System.Collections.Generic.List<T> data, int currentPage, int count) { Data = data; CurrentPage = currentPage; Count = count; }
+        public static implicit operator Paging<T>(string value)
+        {
+            return Extensions.Help.JsonDeserialize<Paging<T>>(value);
+        }
+        public static implicit operator Paging<T>(byte[] value)
+        {
+            return Extensions.Help.ProtoBufDeserialize<Paging<T>>(value);
+        }
 
+        [ProtoBuf.ProtoMember(1, Name = "D")]
         public System.Collections.Generic.List<T> Data { get; set; }
 
+        [ProtoBuf.ProtoMember(2, Name = "P")]
         public int CurrentPage { get; set; }
 
+        [ProtoBuf.ProtoMember(3, Name = "C")]
         public int Count { get; set; }
+
+        public override string ToString()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+
+        public byte[] ToBytes()
+        {
+            return Extensions.Help.ProtoBufSerialize(this);
+        }
     }
 
     public static class DataConnectionEx
@@ -158,20 +179,22 @@ namespace Business.Data
 
         public static Paging<T> GetPaging<T>(this IQueryable<T> query, int pageSize, int currentPage, int pageSizeMax = 30)
         {
+            var count = query.Count();
+            if (0 == count) { return new Paging<T> { Data = new System.Collections.Generic.List<T>() }; }
+
             var _pageSize = System.Math.Min(pageSize, pageSizeMax);
 
-            var count = query.Count();
             var countPage = System.Convert.ToInt32(System.Math.Ceiling(System.Convert.ToDouble(count) / System.Convert.ToDouble(_pageSize)));
 
             currentPage = currentPage < 0 ? 0 : currentPage > countPage ? countPage : currentPage;
             if (currentPage <= 0 && countPage > 0) { currentPage = 1; }
 
-            return new Paging<T>(query.Skip(_pageSize * (currentPage - 1)).Take(_pageSize).ToList(), currentPage, count);
+            return new Paging<T> { Data = query.Skip(_pageSize * (currentPage - 1)).Take(_pageSize).ToList(), CurrentPage = currentPage, Count = count };
         }
 
         public static Paging<T> ToPaging<T>(this System.Collections.Generic.List<T> data, int currentPage, int count)
         {
-            return new Paging<T>(data, currentPage, count);
+            return new Paging<T> { Data = data, CurrentPage = currentPage, Count = count };
         }
 
         public static IQueryable<T> SkipRandom<T>(this IQueryable<T> query, int take = 0)

@@ -8,9 +8,12 @@ namespace Business.Attributes
         public bool TrimAllChar { get; set; }
     }
 
-    public abstract class DeserializeAttribute : ArgumentsAttribute
+    public class DeserializeAttribute : ArgumentsAttribute
     {
-        public abstract object Deserialize(object ags, System.Type type);
+        public virtual object Deserialize(object ags, System.Type type)
+        {
+            return ags;
+        }
     }
 
     public class JsonAttribute : DeserializeAttribute
@@ -326,6 +329,11 @@ namespace Business.Attributes
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class CommandAttribute : System.Attribute
     {
+        public CommandAttribute(string onlyName = null)
+        {
+            this.OnlyName = onlyName;
+        }
+
         public enum DataType
         {
             Byte,
@@ -333,10 +341,12 @@ namespace Business.Attributes
             Json,
         }
 
-        public virtual string OnlyName { get; set; }
+        internal void SetOnlyName(string onlyName) { this.OnlyName = onlyName; }
+
+        public string OnlyName { get; private set; }
 
         DataType resultDataType = DataType.ProtoBuf;
-        public virtual DataType ResultDataType { get { return resultDataType; } set { resultDataType = value; } }
+        public DataType ResultDataType { get { return resultDataType; } set { resultDataType = value; } }
 
         public virtual object Deserialize(object ags, System.Type type)
         {
@@ -346,6 +356,8 @@ namespace Business.Attributes
 
     public class JsonCommandAttribute : CommandAttribute
     {
+        public JsonCommandAttribute(string onlyName = null) : base(onlyName) { }
+
         public override object Deserialize(object ags, System.Type type)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(ags), type);
@@ -354,6 +366,8 @@ namespace Business.Attributes
 
     public class ProtoBufCommandAttribute : CommandAttribute
     {
+        public ProtoBufCommandAttribute(string onlyName = null) : base(onlyName) { }
+
         public override object Deserialize(object ags, System.Type type)
         {
             using (var stream = new System.IO.MemoryStream((byte[])ags))

@@ -6,9 +6,9 @@
     {
         public abstract void Intercept(Castle.DynamicProxy.IInvocation invocation);
 
-        internal protected Business.IBusiness Business { get; set; }
-
         internal protected System.Collections.Concurrent.ConcurrentDictionary<string, Extensions.InterceptorMetaData> MetaData { get; set; }
+
+        internal protected Business.IBusiness Business { get; set; }
 
         internal protected Attributes.BusinessLogAttribute BusinessLogAttr { get; set; }
 

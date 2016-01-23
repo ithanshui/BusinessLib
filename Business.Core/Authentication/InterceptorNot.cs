@@ -3,7 +3,9 @@
     using Result;
     using Business;
 
-    public sealed class InterceptorNot<Result> : InterceptorBase
+    public sealed class InterceptorNot : InterceptorNot<ResultBase<object>> { }
+
+    public class InterceptorNot<Result> : InterceptorBase
         where Result : class, IResult, new()
     {
         public InterceptorNot() : base() { }
@@ -18,6 +20,7 @@
             var arguments = invocation.Arguments;
             var logType = BusinessLogType.Record;
             var logAttr = meta.BusinessLogAttr;
+            var commandAttr = meta.CommandAttr;
             IToken token = null;
             var i = meta.Arguments.Item1;
 
@@ -42,9 +45,16 @@
                 if (1 < arguments.Length && null != arguments[1])
                 {
                     // set ags
-                    if (-1 < i && null != deserialize)
+                    if (-1 < i)
                     {
-                        arguments[i] = deserialize.Deserialize(arguments[1], meta.Arguments.Item2);
+                        if (arguments[1] is Extensions.CommandAgs)
+                        {
+                            arguments[i] = commandAttr.Deserialize(((Extensions.CommandAgs)arguments[1]).Ags, meta.Arguments.Item2);
+                        }
+                        else if (null != deserialize) 
+                        {
+                            arguments[i] = deserialize.Deserialize(arguments[1], meta.Arguments.Item2);
+                        }
 
                         #region check ags
                         //check ags

@@ -5,7 +5,7 @@
     {
         public static implicit operator ResultBase<DataType>(string value)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<ResultBase<DataType>>(value);
+            return Extensions.Help.JsonDeserialize<ResultBase<DataType>>(value);
         }
         public static implicit operator ResultBase<DataType>(byte[] value)
         {
@@ -52,7 +52,7 @@
         /// <summary>
         /// Specific Byte/Json data objects
         /// </summary>
-        [ProtoBuf.ProtoMember(3, Name = "D", AsReference = true)]
+        [ProtoBuf.ProtoMember(3, Name = "D")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
         public virtual DataType Data { get; set; }
 

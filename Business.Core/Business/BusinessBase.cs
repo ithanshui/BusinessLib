@@ -93,7 +93,7 @@
         }
 
         [Attributes.NotIntercept]
-        public virtual string Login(string value, out string error)
+        public virtual string Login(string value, out string error, string commandId = null)
         {
             throw new System.NotImplementedException();
         }
@@ -103,7 +103,8 @@
         {
             if (null == token) { return null; }
 
-            var _token = Extensions.Help.JsonDeserialize<Authentication.Token>(System.Convert.ToString(token));
+            Authentication.Token _token = System.Convert.ToString(token);
+
             if (null == _token) { return null; }
 
             return _token;

@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authentication\Attributes.cs" />
+    <Compile Include="Authentication\IInterceptor.cs" />
     <Compile Include="Authentication\Interceptor.cs" />
     <Compile Include="Authentication\InterceptorBase.cs" />
     <Compile Include="Authentication\InterceptorNot.cs" />

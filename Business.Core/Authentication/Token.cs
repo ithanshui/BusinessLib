@@ -3,7 +3,7 @@
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class Token : IToken
     {
-        public static implicit operator Token(string value) { return Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(value); }
+        public static implicit operator Token(string value) { return Extensions.Help.JsonDeserialize<Token>(value); }
         public static implicit operator Token(byte[] value) { return Extensions.Help.ProtoBufDeserialize<Token>(value); }
 
         [ProtoBuf.ProtoMember(1)]

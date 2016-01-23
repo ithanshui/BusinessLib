@@ -83,9 +83,7 @@
             return new CommandData { Cmd = cmd, Token = token, Key = key, Data = _data };
         }
 
-        public delegate TResult LoginFunc<T1, T2, T3, T4, TResult>(T1 value, out T2 error, T3 commandId, T3 data);
-
-        public static Result.IResult GetCommandResult(this byte[] value, System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> command, System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> commandNot, string ip, string commandId, out Extensions.InterceptorCommand commandMeta, out CommandData commandData, LoginFunc<string, string, string, string, string> Login = null)
+        public static Result.IResult GetCommandResult(this byte[] value, Authentication.IInterception command, Authentication.IInterception commandNot, string ip, string commandId, out Extensions.InterceptorCommand commandMeta, out CommandData commandData)
         {
             commandMeta = default(Extensions.InterceptorCommand);
             string error = null;
@@ -94,7 +92,7 @@
 
             if (!System.String.IsNullOrEmpty(error))
             {
-                return Result.ResultFactory.Create(-999, error);
+                return Result.ResultFactory.Create((int)Mark.MarkItem.Command_DataError, error);
             }
 
             var cmd = commandData.Cmd;
@@ -108,11 +106,11 @@
             {
                 var _value = System.Text.Encoding.UTF8.GetString(data);
                 string _error = null;
-                var _result = Login(_value, out _error, commandId, null);
+                var _result = command.Business.Login(_value, out _error, commandId);
 
                 if (!System.String.IsNullOrEmpty(_error))
                 {
-                    result = Result.ResultFactory.Create(-900, _error);
+                    result = Result.ResultFactory.Create((int)Mark.MarkItem.Login_Error, _error);
                 }
                 else
                 {
@@ -129,17 +127,17 @@
 
                 if (key)//Interceptor
                 {
-                    if (!command.TryGetValue(cmd, out commandMeta))
+                    if (!command.Command.TryGetValue(cmd, out commandMeta))
                     {
-                        result = Result.ResultFactory.Create(-998, string.Format("Not Cmd {0}", cmd));
+                        result = Result.ResultFactory.Create((int)Mark.MarkItem.Command_KeyError, string.Format("Not Cmd {0}", cmd));
                         return result;
                     }
                 }
                 else//InterceptorNot
                 {
-                    if (!commandNot.TryGetValue(cmd, out commandMeta))
+                    if (!commandNot.Command.TryGetValue(cmd, out commandMeta))
                     {
-                        result = Result.ResultFactory.Create(-998, string.Format("Not Cmd {0}", cmd));
+                        result = Result.ResultFactory.Create((int)Mark.MarkItem.Command_KeyError, string.Format("Not Cmd {0}", cmd));
                         return result;
                     }
                 }
@@ -158,11 +156,11 @@
             }
         }
 
-        public static byte[] GetCommandResult(this byte[] value, System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> command, System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> commandNot, string ip, string commandId, LoginFunc<string, string, string, string, string> Login = null)
+        public static byte[] GetCommandResult(this byte[] value, Authentication.IInterception command, Authentication.IInterception commandNot, string ip, string commandId)
         {
             Extensions.InterceptorCommand commandMeta;
             CommandData commandData;
-            var result = GetCommandResult(value, command, commandNot, ip, commandId, out commandMeta, out commandData, Login);
+            var result = GetCommandResult(value, command, commandNot, ip, commandId, out commandMeta, out commandData);
 
             if (null == result) { return null; }
 

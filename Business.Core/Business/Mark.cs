@@ -44,6 +44,19 @@
             Exp_UserFrozen = -8,
 
             /// <summary>
+            /// Login_Error -9
+            /// </summary>
+            Login_Error = -9,
+            /// <summary>
+            /// Command_DataError -10
+            /// </summary>
+            Command_DataError = -10,
+            /// <summary>
+            /// Command_KeyError -11
+            /// </summary>
+            Command_KeyError = -11,
+
+            /// <summary>
             /// Login_ErrorCount 3
             /// </summary>
             Login_ErrorCount = 95,
@@ -54,12 +67,12 @@
             /// <summary>
             /// Login_ErrorFreeze 3
             /// </summary>
-            Login_ErrorFreeze = 93,
+            Login_ErrorFreeze = 93, 
         }
 
         #endregion
 
-        readonly static System.Collections.Specialized.HybridDictionary marks = new System.Collections.Specialized.HybridDictionary(20) { { MarkItem.Exp_UndefinedException, "Undefined Exception" }, { MarkItem.Exp_ArgumentsIllegal, "Arguments Illegal" }, { MarkItem.Exp_SiteIllegal, "Site Illegal" }, { MarkItem.Exp_SessionIllegal, "Session Illegal" }, { MarkItem.Exp_SessionOut, "Session Out" }, { MarkItem.Exp_CompetenceIllegal, "Competence Illegal" }, { MarkItem.Exp_UserError, "User Error" }, { MarkItem.Exp_PasswordError, "Password Error" }, { MarkItem.Exp_UserFrozen, "User Frozen" }, { MarkItem.Login_ErrorCount, 3 }, { MarkItem.Login_ErrorRange, 2 }, { MarkItem.Login_ErrorFreeze, 3 } };
+        readonly static System.Collections.Specialized.HybridDictionary marks = new System.Collections.Specialized.HybridDictionary(20) { { MarkItem.Exp_UndefinedException, "Undefined Exception" }, { MarkItem.Exp_ArgumentsIllegal, "Arguments Illegal" }, { MarkItem.Exp_SiteIllegal, "Site Illegal" }, { MarkItem.Exp_SessionIllegal, "Session Illegal" }, { MarkItem.Exp_SessionOut, "Session Out" }, { MarkItem.Exp_CompetenceIllegal, "Competence Illegal" }, { MarkItem.Exp_UserError, "User Error" }, { MarkItem.Exp_PasswordError, "Password Error" }, { MarkItem.Exp_UserFrozen, "User Frozen" }, { MarkItem.Login_Error, "Login Error" }, { MarkItem.Command_DataError, "Command Data Error" }, { MarkItem.Command_KeyError, "Command Error" }, { MarkItem.Login_ErrorCount, 3 }, { MarkItem.Login_ErrorRange, 2 }, { MarkItem.Login_ErrorFreeze, 3 } };
 
         public static Type Get<Type>(this MarkItem mark) { return Extensions.Help.ChangeType<Type>(marks[mark]); }
     }

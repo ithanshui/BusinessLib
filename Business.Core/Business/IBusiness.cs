@@ -2,7 +2,7 @@
 {
     public interface IBusiness
     {
-        string Login(string value, out string error);
+        string Login(string value, out string error, string commandId = null);
 
         Authentication.IToken GetToken(object token);
 
