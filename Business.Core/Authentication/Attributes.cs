@@ -341,9 +341,7 @@ namespace Business.Attributes
             Json,
         }
 
-        internal void SetOnlyName(string onlyName) { this.OnlyName = onlyName; }
-
-        public string OnlyName { get; private set; }
+        public string OnlyName { get; internal set; }
 
         DataType resultDataType = DataType.ProtoBuf;
         public DataType ResultDataType { get { return resultDataType; } set { resultDataType = value; } }

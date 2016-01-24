@@ -86,7 +86,7 @@
             Attributes.CommandAttribute commandAttr = null;
             var commandAttrs = GetAttributes<Attributes.CommandAttribute>(member);
             commandAttr = 0 < commandAttrs.Length ? commandAttrs[0] : new Attributes.CommandAttribute(name);
-            if (System.String.IsNullOrEmpty(commandAttr.OnlyName)) { commandAttr.SetOnlyName(name); }
+            if (System.String.IsNullOrEmpty(commandAttr.OnlyName)) { commandAttr.OnlyName = name; }
             return commandAttr;
         }
 
