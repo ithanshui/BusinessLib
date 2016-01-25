@@ -3,7 +3,7 @@
     using Result;
     using Business;
 
-    public sealed class InterceptorNot : InterceptorNot<ResultBase<object>> { }
+    public sealed class InterceptorNot : InterceptorNot<ResultBase<string>> { }
 
     public class InterceptorNot<Result> : InterceptorBase
         where Result : class, IResult, new()

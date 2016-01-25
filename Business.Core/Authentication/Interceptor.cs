@@ -3,7 +3,7 @@ namespace Business.Authentication
     using Business;
     using Result;
 
-    public sealed class Interceptor : Interceptor<ResultBase<object>, Session> { }
+    public sealed class Interceptor : Interceptor<ResultBase<string>, Session> { }
 
     public class Interceptor<Result, Session> : InterceptorBase
         where Result : class, IResult, new()
