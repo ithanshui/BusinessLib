@@ -20,7 +20,11 @@ namespace Business.Attributes
     {
         public override object Deserialize(object ags, System.Type type)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(ags), type);
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(ags), type);
+            }
+            catch { throw new System.Exception("Arguments Json deserialize error"); }
         }
     }
 
@@ -28,10 +32,14 @@ namespace Business.Attributes
     {
         public override object Deserialize(object ags, System.Type type)
         {
-            using (var stream = new System.IO.MemoryStream((byte[])ags))
+            try
             {
-                return ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type);
+                using (var stream = new System.IO.MemoryStream((byte[])ags))
+                {
+                    return ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type);
+                }
             }
+            catch { throw new System.Exception("Arguments ProtoBuf deserialize error"); }
         }
     }
 
@@ -235,43 +243,19 @@ namespace Business.Attributes
         [System.Flags]
         public enum CheckCharMode
         {
-            /// <summary>
-            /// 限制为 阿拉伯数字 大写字母 小写字母 中文
-            /// </summary>
             All = 0,
-            /// <summary>
-            /// 限制为 阿拉伯数字
-            /// </summary>
             Number = 2,
-            /// <summary>
-            /// 限制为 大写字母
-            /// </summary>
             Upper = 4,
-            /// <summary>
-            /// 限制为 小写字母
-            /// </summary>
             Lower = 8,
-            /// <summary>
-            /// 限制为 中文
-            /// </summary>
             Chinese = 16
         }
 
-        /// <summary>
-        /// 限制为 阿拉伯数字 大写字母 小写字母 中文
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="mode"></param>
-        /// <returns></returns>
         public static bool CheckChar(string value, CheckCharMode mode = CheckCharMode.All)
         {
             if (null == value || System.String.IsNullOrEmpty(value)) { return false; }
 
             //if (0 < length && length < value.Length) { return false; }
-            /*==================================================================
-             小于33的为控制符 33-47 为半角符号 48-57 为阿拉伯数字 58-64为半角符号
-             65-90为大写字母 91-96为半角符号 97 -122为小写字母 123- 126半角符号 127控制符 大于127为中文
-             ==================================================================*/
+
             var list = new System.Collections.Generic.List<int>();
             for (int i = 0; i < value.Length; i++) { list.Add(value[i]); }
 
@@ -284,10 +268,10 @@ namespace Business.Attributes
             {
                 case CheckCharMode.All:
                     return !list.Exists(c =>
-                number(c) && //阿拉伯数字
-                upper(c) && //大写字母
-                lower(c) && //小写字母
-                chinese(c));//中文
+                number(c) &&
+                upper(c) &&
+                lower(c) &&
+                chinese(c));
                 case CheckCharMode.Number:
                     return !list.Exists(c => number(c));
                 case CheckCharMode.Upper:
@@ -358,7 +342,11 @@ namespace Business.Attributes
 
         public override object Deserialize(object ags, System.Type type)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(ags), type);
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(ags), type);
+            }
+            catch { throw new System.Exception("Arguments Json deserialize error"); }
         }
     }
 
@@ -368,31 +356,31 @@ namespace Business.Attributes
 
         public override object Deserialize(object ags, System.Type type)
         {
-            using (var stream = new System.IO.MemoryStream((byte[])ags))
+            try
             {
-                return ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type);
+                using (var stream = new System.IO.MemoryStream((byte[])ags))
+                {
+                    return ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type);
+                }
             }
+            catch { throw new System.Exception("Arguments ProtoBuf deserialize error"); }
         }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class BusinessLogAttribute : System.Attribute
     {
-        public BusinessLogAttribute(bool notRecord = false, bool notValue = false, bool notResult = false)
+        public BusinessLogAttribute(bool notRecord = false)
         {
             this.notRecord = notRecord;
-            this.notValue = notValue;
-            this.notResult = notResult;
         }
 
         readonly bool notRecord;
         public bool NotRecord { get { return notRecord; } }
 
-        readonly bool notValue;
-        public bool NotValue { get { return notValue; } }
+        public bool NotValue { get; set; }
 
-        readonly bool notResult;
-        public bool NotResult { get { return notResult; } }
+        public bool NotResult { get; set; }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple = false, Inherited = true)]

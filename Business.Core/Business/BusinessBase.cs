@@ -72,7 +72,7 @@
 
         public ICache Cache { get { return cache; } }
 
-        public BusinessBase(params System.Action[] timerActions)
+        internal BusinessBase(params System.Action[] timerActions)
         {
             if (0 == timerActions.Length) { return; }
             //DynamicProxy

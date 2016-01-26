@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Business.Lib")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("tmopen")]
+[assembly: AssemblyCompany("www.tmopen.com")]
 [assembly: AssemblyProduct("Business.Lib")]
 [assembly: AssemblyCopyright("Copyright ©  2014~2016")]
 [assembly: AssemblyTrademark("")]

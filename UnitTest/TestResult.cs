@@ -86,8 +86,10 @@ namespace UnitTest
         public static Business.Log.NLogAdapter OnlyLog = new Business.Log.NLogAdapter(LogManager.GetCurrentClassLogger());
 
         static Business.Authentication.Interceptor<ResultProtoBuf<string>, Session<List<string>>> Authentication = new Interceptor<ResultProtoBuf<string>, Session<List<string>>>();
-
         public static Business.Extensions.InterceptorBind<BusinessMember> Interceptor = new InterceptorBind<BusinessMember>(Authentication);
+
+        static Business.Authentication.Interceptor Authentication1 = new Interceptor();
+        public static Business.Extensions.InterceptorBind<BusinessMember1> Interceptor1 = new InterceptorBind<BusinessMember1>(Authentication1);
 
         public static IResult<DataType> GetResult<DataType>(this DataType data)
         {
@@ -136,55 +138,6 @@ namespace UnitTest
                 ProtoBuf.Serializer.Serialize(stream, this);
                 return stream.ToArray();
             }
-        }
-    }
-
-    [ProtoBuf.ProtoContract(SkipConstructor = true)]
-    public class ResultProtoBuf : IResult
-    {
-        public static implicit operator ResultProtoBuf(string value)
-        {
-            return Help.JsonDeserialize<ResultProtoBuf>(value);
-        }
-        public static implicit operator ResultProtoBuf(byte[] value)
-        {
-            return Help.ProtoBufDeserialize<ResultProtoBuf>(value);
-        }
-
-        [ProtoBuf.ProtoMember(1, Name = "S")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
-        public System.Int32 State { get; set; }
-
-        [ProtoBuf.ProtoMember(2, Name = "M")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
-        public System.String Message { get; set; }
-
-        [ProtoBuf.ProtoMember(3, Name = "D", DynamicType = true)]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
-        public dynamic Data { get; set; }
-
-        public byte[] ToBytes()
-        {
-            using (var stream = new System.IO.MemoryStream())
-            {
-                ProtoBuf.Serializer.Serialize(stream, this);
-                return stream.ToArray();
-            }
-        }
-
-        public override string ToString()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-
-        public string ToDataString()
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] ToDataBytes()
-        {
-            throw new NotImplementedException();
         }
     }
 
@@ -278,7 +231,7 @@ namespace UnitTest
                 //-----Writing business logic end-----//
 
                 //send value-key
-                var key = System.String.IsNullOrEmpty(session.Key) ? System.Guid.NewGuid().ToString("N") : session.Key;
+                var key = System.String.IsNullOrEmpty(cmdId) ? System.Guid.NewGuid().ToString("N") : cmdId;
                 session.Key = string.Format("Session_{0}", key);
 
                 session.Time = time;
@@ -381,14 +334,153 @@ namespace UnitTest
         }
     }
 
+    public class BusinessMember1 : BusinessBase<Data, Business.Log.NLogAdapter, Business.Cache.ICache>
+    {
+        public BusinessMember1()
+            : base(Common.OnlyData, Common.OnlyLog, Common.OnlyCache, () =>
+            { })
+        {
+            this.WriteLogAsync = x =>
+            {
+                System.Console.WriteLine(x);
+            };
+        }
+
+        #region Optional override Login Session Token Competence
+
+        public override string Login(string value, out string error, string cmdId = null)
+        {
+            error = System.String.Empty;
+
+            try
+            {
+                if (System.String.IsNullOrEmpty(value)) { return System.String.Empty; }
+
+                Session session = value;
+
+                var time = System.DateTime.Now;
+
+                //-----Start writing business logic-----//
+
+                //Add permissions
+                //session.Competences = new List<string>();
+
+                //-----Writing business logic end-----//
+
+                //send value-key
+                var key = System.String.IsNullOrEmpty(cmdId) ? System.Guid.NewGuid().ToString("N") : cmdId;
+                session.Key = string.Format("Session_{0}", key);
+
+                session.Time = time;
+                this.Cache.Set(session.Key, session.ToBytes(), TimeSpan.FromMinutes(1440));
+                //Relation key
+                this.Cache.Set(session.Account, session.Key, TimeSpan.FromMinutes(1440));
+
+                return key;
+            }
+            catch (System.Exception ex)
+            {
+                this.WriteLogAsync.BeginInvoke(new BusinessLogData(BusinessLogType.Exception, "Login", "Sys", value, ex, 0, "Login", null), null, null);
+
+                error = JsonConvert.SerializeObject(ex);//allow hide or show!
+                return System.String.Empty;//hide to log!
+            }
+        }
+
+        public override IToken GetToken(object token)
+        {
+            if (null == token) { return null; }
+
+            var _token = Help.JsonDeserialize<Token>(System.Convert.ToString(token));
+            if (null == _token) { return null; }
+
+            return _token;
+        }
+
+        public override Session GetSession<Session>(Business.Authentication.IToken token)
+        {
+            if (null == token) { return null; }
+
+            var cacheValue = this.Cache.Get(string.Format("Session_{0}", token.Key));
+            if (!cacheValue.HasValue) { return null; }
+
+            var session = Help.ProtoBufDeserialize<Session>(cacheValue);
+
+            if (!System.Object.Equals(session.IP, token.IP))
+            {
+                session.IP = token.IP; this.Cache.Set(session.Key, session.ToBytes());
+            }
+
+            return session;
+        }
+
+        public override bool CheckCompetence(ISession session, string competence)
+        {
+            return !(null != session.Competences && !session.Competences.Contains(competence));
+        }
+
+        #endregion
+
+        [ProtoBufCommand("H2", ResultDataType = CommandAttribute.DataType.ProtoBuf)]
+        public virtual IResult Test3(object token, object arguments = null, Session session = null, Parameters.Register ags = default(Parameters.Register))
+        {
+            //data
+            /*
+            using (var con = this.DB.GetConnection())
+            {
+                con.BeginTransaction();
+
+                var songs = con.Entity.songs.Where(c => c.songs_name == "eeee");
+                foreach (var item in songs)
+                {
+                    System.Console.WriteLine(string.Format("{0}|{1}", item.songs_name, item.songs_passwd));
+                }
+
+                con.Commit();
+            }
+            */
+            //cache
+            this.Cache.Set("222", "333");
+            this.Cache.Set("2qw", "333");
+            this.Cache.Set("3qw", "333");
+
+            this.Cache.Remove("222");
+            this.Cache.Remove("2qw");
+            this.Cache.Remove("3qw");
+
+            this.Cache.Remove(session.Key);
+            this.Cache.Remove(session.Account);
+
+            //log
+            this.Log.Debug(ags.account);
+
+            //result
+            var resultData = new List<Result> { new Result { account = "aaa", email = "bbb" }, new Result { account = "ccc", email = "ddd" } };
+
+            var result1 = ResultFactory.Create(resultData);
+
+            return result1;
+        }
+    }
+
     [TestClass]
-    public class UnitTest1
+    public class TestResult
     {
         static string GetToken()
         {
             var session = new Session<List<string>> { Account = "admin", Password = "test", IP = "192.168.1.111", Site = "Site1" }.ToString();
             var error = System.String.Empty;
             var key = Common.Interceptor.Instance.Login(session, out error);
+            if (!System.String.IsNullOrEmpty(error)) { throw new System.Exception(error); }
+            var token = new Business.Authentication.Token { Key = key, IP = "192.168" }.ToString();
+            return token;
+        }
+
+        static string GetToken1()
+        {
+            var session = new Session { Account = "admin", Password = "test", IP = "192.168.1.111", Site = "Site1" }.ToString();
+            var error = System.String.Empty;
+            var key = Common.Interceptor1.Instance.Login(session, out error);
             if (!System.String.IsNullOrEmpty(error)) { throw new System.Exception(error); }
             var token = new Business.Authentication.Token { Key = key, IP = "192.168" }.ToString();
             return token;
@@ -417,8 +509,26 @@ namespace UnitTest
             Assert.IsNotNull(rrr1);
         }
 
+        static void Asserts1(string json, byte[] bytes)
+        {
+            var ddd1 = (ResultBase<List<System.Tuple<string, string>>>)Help.ProtoBufDeserialize(bytes, typeof(ResultBase<List<System.Tuple<string, string>>>));
+            Assert.IsNotNull(ddd1);
+
+            if (null != bytes)
+            {
+                ResultBase<List<System.Tuple<string, string>>> ddd5 = bytes;
+                Assert.IsNotNull(ddd5);
+
+                var rrr2 = (ResultBase<List<Result>>)bytes;
+                Assert.IsNotNull(rrr2);
+            }
+
+            ResultBase<List<Result>> rrr1 = json;
+            Assert.IsNotNull(rrr1);
+        }
+
         [TestMethod]
-        public void TestResultProtoBuf1()
+        public void TestResult1()
         {
             var token = GetToken();
 
@@ -442,7 +552,7 @@ namespace UnitTest
         }
 
         [TestMethod]
-        public void TestResultProtoBuf2()
+        public void TestResult2()
         {
             var token = GetToken();
 
@@ -466,7 +576,7 @@ namespace UnitTest
         }
 
         [TestMethod]
-        public void TestResultProtoBuf3()
+        public void TestResult3()
         {
             var token = GetToken();
 
@@ -490,7 +600,7 @@ namespace UnitTest
         }
 
         [TestMethod]
-        public void TestResultProtoBuf4()
+        public void TestResult4()
         {
             var token = GetToken();
 
@@ -511,6 +621,102 @@ namespace UnitTest
             System.Console.WriteLine(time);
 
             Asserts(json, bytes);
+        }
+
+        [TestMethod]
+        public void TestResult5()
+        {
+            var token = GetToken1();
+
+            var ps = Parameter();
+
+            var startTime = new System.Diagnostics.Stopwatch();
+            startTime.Start();
+
+            var rrr = Common.Interceptor1.Instance.Test3(token, ps.ToString());
+
+            var json = rrr.ToString();
+
+            var bytes = rrr.ToBytes();
+
+            startTime.Stop();
+
+            var time = startTime.Elapsed.TotalMilliseconds;
+            System.Console.WriteLine(time);
+
+            Asserts1(json, bytes);
+        }
+
+        [TestMethod]
+        public void TestResult6()
+        {
+            var token = GetToken1();
+
+            var ps = Parameter();
+
+            var startTime = new System.Diagnostics.Stopwatch();
+            startTime.Start();
+
+            var rrr = Common.Interceptor1.Instance.Test3(token, ps.ToBytes());
+
+            var json = rrr.ToString();
+
+            var bytes = rrr.ToBytes();
+
+            startTime.Stop();
+
+            var time = startTime.Elapsed.TotalMilliseconds;
+            System.Console.WriteLine(time);
+
+            Asserts1(json, bytes);
+        }
+
+        [TestMethod]
+        public void TestResult7()
+        {
+            var token = GetToken1();
+
+            var ps = Parameter();
+
+            var startTime = new System.Diagnostics.Stopwatch();
+            startTime.Start();
+
+            var rrr = Common.Interceptor1.Command["H2"].Method(token, ps.ToBytes());
+
+            var json = rrr.ToString();
+
+            var bytes = rrr.ToBytes();
+
+            startTime.Stop();
+
+            var time = startTime.Elapsed.TotalMilliseconds;
+            System.Console.WriteLine(time);
+
+            Asserts1(json, bytes);
+        }
+
+        [TestMethod]
+        public void TestResult8()
+        {
+            var token = GetToken1();
+
+            var ps = Parameter();
+
+            var startTime = new System.Diagnostics.Stopwatch();
+            startTime.Start();
+
+            var rrr = Common.Interceptor1.Command["H2"].Method(token, ps.ToString());
+
+            var json = rrr.ToString();
+
+            var bytes = rrr.ToBytes();
+
+            startTime.Stop();
+
+            var time = startTime.Elapsed.TotalMilliseconds;
+            System.Console.WriteLine(time);
+
+            Asserts1(json, bytes);
         }
     }
 }

@@ -126,43 +126,19 @@ namespace Business.Extensions
         [System.Flags]
         public enum CheckCharMode
         {
-            /// <summary>
-            /// 限制为 阿拉伯数字 大写字母 小写字母 中文
-            /// </summary>
             All = 0,
-            /// <summary>
-            /// 限制为 阿拉伯数字
-            /// </summary>
             Number = 2,
-            /// <summary>
-            /// 限制为 大写字母
-            /// </summary>
             Upper = 4,
-            /// <summary>
-            /// 限制为 小写字母
-            /// </summary>
             Lower = 8,
-            /// <summary>
-            /// 限制为 中文
-            /// </summary>
             Chinese = 16
         }
 
-        /// <summary>
-        /// 限制为 阿拉伯数字 大写字母 小写字母 中文
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="mode"></param>
-        /// <returns></returns>
-        public static bool CheckChar(this string value, CheckCharMode mode = CheckCharMode.All)
+        public static bool CheckChar(string value, CheckCharMode mode = CheckCharMode.All)
         {
             if (null == value || System.String.IsNullOrEmpty(value)) { return false; }
 
             //if (0 < length && length < value.Length) { return false; }
-            /*==================================================================
-             小于33的为控制符 33-47 为半角符号 48-57 为阿拉伯数字 58-64为半角符号
-             65-90为大写字母 91-96为半角符号 97 -122为小写字母 123- 126半角符号 127控制符 大于127为中文
-             ==================================================================*/
+
             var list = new System.Collections.Generic.List<int>();
             for (int i = 0; i < value.Length; i++) { list.Add(value[i]); }
 
@@ -175,10 +151,10 @@ namespace Business.Extensions
             {
                 case CheckCharMode.All:
                     return !list.Exists(c =>
-                number(c) && //阿拉伯数字
-                upper(c) && //大写字母
-                lower(c) && //小写字母
-                chinese(c));//中文
+                number(c) &&
+                upper(c) &&
+                lower(c) &&
+                chinese(c));
                 case CheckCharMode.Number:
                     return !list.Exists(c => number(c));
                 case CheckCharMode.Upper:
