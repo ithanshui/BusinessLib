@@ -13,7 +13,7 @@ NuGet:https://www.nuget.org/packages/Business.Lib/
     {
         [CanNotNull(-11, "\"account\" not is null")]
         [Size(-12, Min = 4, Max = "8")]
-        [CheckChar(Mode = Help.CheckCharMode.All, Code = -13, Message = "\" char account\" verification failed")]
+        [CheckChar(-13, "\" char account\" verification failed", Mode = Help.CheckCharMode.All)]
         public string account;
     }
 
