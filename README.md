@@ -4,7 +4,7 @@ NuGet:https://www.nuget.org/packages/Business.Lib/
 
 # This is a Server framework
 
-# Please refer to the Template.cs
+# Please refer to the UnitTest
 
 # Arguments receive the beginning
     
@@ -19,6 +19,21 @@ NuGet:https://www.nuget.org/packages/Business.Lib/
 
 # IResult end
 
+    public interface ISerialize
+    {
+        /// <summary>
+        /// ProtoBuf
+        /// </summary>
+        /// <returns></returns>
+        byte[] ToBytes();
+
+        /// <summary>
+        /// Json
+        /// </summary>
+        /// <returns></returns>
+        string ToString();
+    }
+    
     public interface IResult : Authentication.ISerialize
     {
         /// <summary>
