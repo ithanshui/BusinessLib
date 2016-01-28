@@ -4,7 +4,7 @@ NuGet:https://www.nuget.org/packages/Business.Lib/
 
 # This is a Server framework
 
-# Please refer to the Template.cs
+# Please refer to the UnitTest
 
 # Arguments receive the beginning
     
@@ -13,12 +13,27 @@ NuGet:https://www.nuget.org/packages/Business.Lib/
     {
         [CanNotNull(-11, "\"account\" not is null")]
         [Size(-12, Min = 4, Max = "8")]
-        [CheckChar(Mode = Help.CheckCharMode.All, Code = -13, Message = "\" char account\" verification failed")]
+        [CheckChar(-13, "\" char account\" verification failed", Mode = Help.CheckCharMode.All)]
         public string account;
     }
 
 # IResult end
 
+    public interface ISerialize
+    {
+        /// <summary>
+        /// ProtoBuf
+        /// </summary>
+        /// <returns></returns>
+        byte[] ToBytes();
+
+        /// <summary>
+        /// Json
+        /// </summary>
+        /// <returns></returns>
+        string ToString();
+    }
+    
     public interface IResult : Authentication.ISerialize
     {
         /// <summary>
