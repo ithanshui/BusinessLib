@@ -1,4 +1,4 @@
-﻿namespace Business.Authentication
+﻿namespace Business.Auth
 {
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class Token : IToken

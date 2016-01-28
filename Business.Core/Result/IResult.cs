@@ -1,6 +1,6 @@
 ﻿namespace Business.Result
 {
-    public interface IResult : Authentication.ISerialize
+    public interface IResult : Auth.ISerialize
     {
         /// <summary>
         /// The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.

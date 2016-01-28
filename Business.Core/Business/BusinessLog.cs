@@ -13,7 +13,7 @@
     }
 
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
-    public struct BusinessLogData : Authentication.ISerialize//, System.IEquatable<BusinessLogData>
+    public struct BusinessLogData : Auth.ISerialize//, System.IEquatable<BusinessLogData>
     {
         public static implicit operator BusinessLogData(string value)
         {

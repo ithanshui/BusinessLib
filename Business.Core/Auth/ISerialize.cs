@@ -1,4 +1,4 @@
-﻿namespace Business.Authentication
+﻿namespace Business.Auth
 {
     public interface ISerialize
     {

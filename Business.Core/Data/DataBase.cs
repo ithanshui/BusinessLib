@@ -58,7 +58,7 @@ namespace Business.Data
     }
 
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
-    public struct Paging<T> : Authentication.ISerialize
+    public struct Paging<T> : Auth.ISerialize
     {
         public static implicit operator Paging<T>(string value)
         {
@@ -209,21 +209,6 @@ namespace Business.Data
             }
             return query;
         }
-        //public static int Execute(this IConnection connection, object obj, System.Func<object, int> func)
-        //{
-        //    bool isCreateTransaction = false;
-        //    if (null == connection.Transaction) { connection.BeginTransaction(); isCreateTransaction = !isCreateTransaction; }
-
-        //    try
-        //    {
-        //        var i = func(obj);
-        //        if (-1 == i) { connection.Rollback(); return i; }
-        //        if (isCreateTransaction) { connection.Commit(); }
-        //        return i;
-        //    }
-        //    catch (System.Exception ex) { if (null != connection.Transaction) { connection.Rollback(); } throw ex; }
-        //    finally { if (isCreateTransaction && null != connection.Transaction) { connection.Transaction.Dispose(); } }
-        //}
     }
 
     public abstract class DataBase<IConnection> : IData

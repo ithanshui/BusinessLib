@@ -30,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Business.Core.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -49,16 +50,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authentication\Attributes.cs" />
-    <Compile Include="Authentication\IInterceptor.cs" />
-    <Compile Include="Authentication\Interceptor.cs" />
-    <Compile Include="Authentication\InterceptorBase.cs" />
-    <Compile Include="Authentication\InterceptorNot.cs" />
-    <Compile Include="Authentication\ISerialize.cs" />
-    <Compile Include="Authentication\ISession.cs" />
-    <Compile Include="Authentication\IToken.cs" />
-    <Compile Include="Authentication\Session.cs" />
-    <Compile Include="Authentication\Token.cs" />
+    <Compile Include="Auth\Attributes.cs" />
+    <Compile Include="Auth\IInterceptor.cs" />
+    <Compile Include="Auth\Interceptor.cs" />
+    <Compile Include="Auth\InterceptorBase.cs" />
+    <Compile Include="Auth\InterceptorNot.cs" />
+    <Compile Include="Auth\ISerialize.cs" />
+    <Compile Include="Auth\ISession.cs" />
+    <Compile Include="Auth\IToken.cs" />
+    <Compile Include="Auth\Session.cs" />
+    <Compile Include="Auth\Token.cs" />
     <Compile Include="Business\BusinessBase.cs" />
     <Compile Include="Business\BusinessLog.cs" />
     <Compile Include="Business\IBusiness.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Result\ResultBase.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Business.Core.nupkg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

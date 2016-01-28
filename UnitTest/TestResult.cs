@@ -1,13 +1,13 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StackExchange.Redis;
-using Business.Authentication;
+using Business;
+using Business.Extensions;
+using Business.Auth;
 using Business.Result;
 using Business.Attributes;
 using System.Collections.Generic;
 using ProtoBuf;
-using Business;
-using Business.Extensions;
 using NLog;
 using LinqToDB.Mapping;
 using LinqToDB;
@@ -47,7 +47,7 @@ namespace UnitTest
         public Entitys(IDataContext con)
         { this.con = con; }
 
-        public System.Linq.IQueryable<songs> songs { get { return Get<songs>(); } }
+        public IQueryable<songs> songs { get { return Get<songs>(); } }
 
         public override IQueryable<T> Get<T>()
         {
@@ -85,10 +85,10 @@ namespace UnitTest
 
         public static Business.Log.NLogAdapter OnlyLog = new Business.Log.NLogAdapter(LogManager.GetCurrentClassLogger());
 
-        static Business.Authentication.Interceptor<ResultProtoBuf<string>, Session<List<string>>> Authentication = new Interceptor<ResultProtoBuf<string>, Session<List<string>>>();
+        static Business.Auth.Interceptor<ResultProtoBuf<string>, Session<List<string>>> Authentication = new Interceptor<ResultProtoBuf<string>, Session<List<string>>>();
         public static Business.Extensions.InterceptorBind<BusinessMember> Interceptor = new InterceptorBind<BusinessMember>(Authentication);
 
-        static Business.Authentication.Interceptor Authentication1 = new Interceptor();
+        static Business.Auth.Interceptor Authentication1 = new Interceptor();
         public static Business.Extensions.InterceptorBind<BusinessMember1> Interceptor1 = new InterceptorBind<BusinessMember1>(Authentication1);
 
         public static IResult<DataType> GetResult<DataType>(this DataType data)
@@ -260,7 +260,7 @@ namespace UnitTest
             return _token;
         }
 
-        public override Session GetSession<Session>(Business.Authentication.IToken token)
+        public override Session GetSession<Session>(Business.Auth.IToken token)
         {
             if (null == token) { return null; }
 
@@ -397,7 +397,7 @@ namespace UnitTest
             return _token;
         }
 
-        public override Session GetSession<Session>(Business.Authentication.IToken token)
+        public override Session GetSession<Session>(Business.Auth.IToken token)
         {
             if (null == token) { return null; }
 
@@ -472,7 +472,7 @@ namespace UnitTest
             var error = System.String.Empty;
             var key = Common.Interceptor.Instance.Login(session, out error);
             if (!System.String.IsNullOrEmpty(error)) { throw new System.Exception(error); }
-            var token = new Business.Authentication.Token { Key = key, IP = "192.168" }.ToString();
+            var token = new Business.Auth.Token { Key = key, IP = "192.168" }.ToString();
             return token;
         }
 
@@ -482,7 +482,7 @@ namespace UnitTest
             var error = System.String.Empty;
             var key = Common.Interceptor1.Instance.Login(session, out error);
             if (!System.String.IsNullOrEmpty(error)) { throw new System.Exception(error); }
-            var token = new Business.Authentication.Token { Key = key, IP = "192.168" }.ToString();
+            var token = new Business.Auth.Token { Key = key, IP = "192.168" }.ToString();
             return token;
         }
 
@@ -537,7 +537,8 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor.Instance.Test3(token, ps.ToString());
+            var rrr = Common.Interceptor.Member["Test3"](token, ps.ToString());
+            //var rrr = Common.Interceptor.Instance.Test3(token, ps.ToString());
 
             var json = rrr.ToString();
 
@@ -561,7 +562,8 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor.Instance.Test3(token, ps.ToBytes());
+            var rrr = Common.Interceptor.Member["Test3"](token, ps.ToBytes());
+            //var rrr = Common.Interceptor.Instance.Test3(token, ps.ToBytes());
 
             var json = rrr.ToString();
 
@@ -585,7 +587,7 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor.Command["H2"].Method(token, ps.ToBytes());
+            var rrr = Common.Interceptor.Command["H2"].Member(token, ps.ToBytes());
 
             var json = rrr.ToString();
 
@@ -609,7 +611,7 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor.Command["H2"].Method(token, ps.ToString());
+            var rrr = Common.Interceptor.Command["H2"].Member(token, ps.ToString());
 
             var json = rrr.ToString();
 
@@ -633,7 +635,8 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor1.Instance.Test3(token, ps.ToString());
+            var rrr = Common.Interceptor1.Member["Test3"](token, ps.ToString());
+            //var rrr = Common.Interceptor1.Instance.Test3(token, ps.ToString());
 
             var json = rrr.ToString();
 
@@ -657,7 +660,8 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor1.Instance.Test3(token, ps.ToBytes());
+            var rrr = Common.Interceptor1.Member["Test3"](token, ps.ToBytes());
+            //var rrr = Common.Interceptor1.Instance.Test3(token, ps.ToBytes());
 
             var json = rrr.ToString();
 
@@ -681,7 +685,7 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor1.Command["H2"].Method(token, ps.ToBytes());
+            var rrr = Common.Interceptor1.Command["H2"].Member(token, ps.ToBytes());
 
             var json = rrr.ToString();
 
@@ -705,7 +709,7 @@ namespace UnitTest
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 
-            var rrr = Common.Interceptor1.Command["H2"].Method(token, ps.ToString());
+            var rrr = Common.Interceptor1.Command["H2"].Member(token, ps.ToString());
 
             var json = rrr.ToString();
 

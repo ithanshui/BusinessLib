@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StackExchange.Redis;
-using Business.Authentication;
+using Business.Auth;
 using Business.Result;
 using Business.Attributes;
 using System.Collections.Generic;
@@ -68,7 +68,7 @@ namespace UnitTest
             var command = Command.GetCommandResult(vaele);
 
             Result(command);
-
+            //=================================//
             var ps = Parameter();
             var value = Command.GetCommandData("H2", "H2Token", true, ps.ToBytes());
 

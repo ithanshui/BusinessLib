@@ -83,7 +83,7 @@
             return new CommandData { Cmd = cmd, Token = token, Key = key, Data = _data };
         }
 
-        public static Result.IResult GetCommandResult(this byte[] value, Authentication.IInterception command, Authentication.IInterception commandNot, string ip, string commandId, out Extensions.InterceptorCommand commandMeta, out CommandData commandData)
+        public static Result.IResult GetCommandResult(this byte[] value, Auth.IInterception command, Auth.IInterception commandNot, string ip, string commandId, out Extensions.InterceptorCommand commandMeta, out CommandData commandData)
         {
             commandMeta = default(Extensions.InterceptorCommand);
             string error = null;
@@ -142,9 +142,9 @@
                     }
                 }
 
-                var _token = new Authentication.Token { Key = key ? commandId : "WebSocket", IP = ip }.ToString();
+                var _token = new Auth.Token { Key = key ? commandId : "WebSocket", IP = ip }.ToString();
 
-                result = commandMeta.Method(_token, data);
+                result = commandMeta.Member(_token, data);
 
                 //Result
                 if (commandMeta.HasReturn && !System.String.IsNullOrEmpty(token))
@@ -156,7 +156,7 @@
             }
         }
 
-        public static byte[] GetCommandResult(this byte[] value, Authentication.IInterception command, Authentication.IInterception commandNot, string ip, string commandId)
+        public static byte[] GetCommandResult(this byte[] value, Auth.IInterception command, Auth.IInterception commandNot, string ip, string commandId)
         {
             Extensions.InterceptorCommand commandMeta;
             CommandData commandData;

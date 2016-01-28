@@ -99,17 +99,17 @@
 
         public static IResult Create()
         {
-            return Create<ResultBase<object>>();
+            return Create<ResultBase<string>>();
         }
 
         public static IResult Create(int state)
         {
-            return Create<ResultBase<object>>(state);
+            return Create<ResultBase<string>>(state);
         }
 
         public static IResult Create(int state, string message)
         {
-            return Create<ResultBase<object>>(state, message);
+            return Create<ResultBase<string>>(state, message);
         }
 
         public static IResult<Data> Create<Data>(this Data data, int state = 1)
@@ -153,25 +153,6 @@
             return result;
         }
 
-        //public static IResult<Data> Create<Result, Data>(this Data data, int state = 1)
-        //    where Result : class, IResult<Data>, new()
-        //{
-        //    if (1 > state) { state = System.Math.Abs(state); }
-
-        //    return new Result { State = state, Data = data };
-        //}
-
-        //public static IResult<Data> Create1<Result, Data>(this Result result, Data data, int state = 1)
-        //    where Result : class, IResult<Data>
-        //{
-        //    if (1 > state) { state = System.Math.Abs(state); }
-
-        //    result.State = state;
-        //    result.Data = data;
-
-        //    return result;
-        //}
-
         public static Result Create<Result>(Business.Mark.MarkItem mark)
             where Result : class, IResult, new()
         {
@@ -179,17 +160,7 @@
         }
 
         //========================================================//
-        /*
-        public static ResultBase<DataType> DeserializeResultJson<DataType>(this string value)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<ResultBase<DataType>>(value);
-        }
-
-        public static IResult<DataType> DeserializeResultProtoBuf<DataType>(this byte[] source)
-        {
-            return DeserializeResultProtoBuf<DataType, ResultBase<DataType>>(source);
-        }
-        */
+        
         public static IResult<DataType> DeserializeResultProtoBuf<DataType, Result>(this byte[] source)
     where Result : class, IResult<DataType>, new()
         {

@@ -15,14 +15,14 @@
         }
     }
 
-    public class InterceptorBind<T> : Authentication.IInterception, System.IDisposable
+    public class InterceptorBind<T> : Auth.IInterception, System.IDisposable
         where T : class, Business.IBusiness
     {
         readonly BusinessAllMethodsHook hook;
         readonly Castle.DynamicProxy.ProxyGenerator ProxyGenerator = new Castle.DynamicProxy.ProxyGenerator();
         public readonly T Instance;
 
-        public InterceptorBind(Authentication.InterceptorBase interceptor)
+        public InterceptorBind(Auth.InterceptorBase interceptor)
         {
             var type = typeof(T);
 
@@ -34,6 +34,7 @@
 
             Instance = ProxyGenerator.CreateClassProxy<T>(new Castle.DynamicProxy.ProxyGenerationOptions(hook), interceptor);
 
+            this.Member = GetInterceptorMember(notIntercept.Item2, Instance);
             this.Command = GetInterceptorCommand(notIntercept.Item2, Instance);
             this.Business = Instance;
 
@@ -49,6 +50,8 @@
                 ((System.IDisposable)Instance).Dispose();
             }
         }
+
+        public System.Collections.Concurrent.ConcurrentDictionary<string, System.Func<object, object, Result.IResult>> Member { get; set; }
 
         public System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> Command { get; set; }
 
@@ -167,7 +170,7 @@
             return (T[])member.GetCustomAttributes(inherit);
         }
 
-        internal System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> GetInterceptorMetaData(System.Reflection.MethodInfo[] methods)
+        internal static System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> GetInterceptorMetaData(System.Reflection.MethodInfo[] methods)
         {
             var interceptorMetaData = new System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData>();
 
@@ -175,7 +178,6 @@
             {
                 var parameters = GetParameters(item);
                 var agsTypes = parameters.Item1;
-                var agsObjs = parameters.Item2;
 
                 var i = -1;
                 Attributes.ArgumentsAttribute attr = null;
@@ -190,7 +192,6 @@
 
                         var deserializeAttrs = GetAttributes<Attributes.DeserializeAttribute>(agsTypes[i2]);
                         if (0 < deserializeAttrs.Length) { deserialize = deserializeAttrs[0]; }
-                        break;
                     }
                 }
 
@@ -199,7 +200,7 @@
                 //======CmdAttribute======//
                 Attributes.CommandAttribute commandAttr = CmdAttr(item, item.Name);
 
-                var metaData = new InterceptorMetaData(System.Array.FindIndex(agsTypes, p => typeof(Authentication.ISession).IsAssignableFrom(p)), new System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute>(i, agsType, attr, deserialize), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>>(), logAttr, commandAttr, item.GetMethodFullName(), !typeof(void).Equals(item.ReturnType.FullName));
+                var metaData = new InterceptorMetaData(System.Array.FindIndex(agsTypes, p => typeof(Auth.ISession).IsAssignableFrom(p)), new System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute>(i, agsType, attr, deserialize), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>>(), logAttr, commandAttr, item.GetMethodFullName(), !typeof(void).Equals(item.ReturnType.FullName));
 
                 if (-1 < i)
                 {
@@ -246,7 +247,7 @@
             return interceptorMetaData;
         }
 
-        internal System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> GetInterceptorCommand(System.Reflection.MethodInfo[] methods, object proxy)
+        internal static System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand> GetInterceptorCommand(System.Reflection.MethodInfo[] methods, object proxy)
         {
             var interceptorCommand = new System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorCommand>();
 
@@ -263,6 +264,21 @@
             }
 
             return interceptorCommand;
+        }
+
+        internal static System.Collections.Concurrent.ConcurrentDictionary<string, System.Func<object, object, Result.IResult>> GetInterceptorMember(System.Reflection.MethodInfo[] methods, object proxy)
+        {
+            var member = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Func<object, object, Result.IResult>>();
+
+            foreach (var item in methods)
+            {
+                var parameters = GetParameters(item);
+                var agsObjs = parameters.Item2;
+
+                if (!member.TryAdd(item.Name, new System.Func<object, object, Result.IResult>((token, arguments) => cmstar.RapidReflection.Emit.MethodInvokerGenerator.CreateDelegate(proxy.GetType().GetMethod(item.Name), false)(proxy, GetAgsObj(agsObjs, token, arguments)) as Result.IResult))) { throw new System.Exception(string.Format("Member Name Exists {0}!", item.Name)); }
+            }
+
+            return member;
         }
     }
 
@@ -326,16 +342,16 @@
 
     public struct InterceptorCommand
     {
-        public InterceptorCommand(System.Func<object, object, Result.IResult> method, Attributes.CommandAttribute.DataType resultDataType, bool hasReturn)
+        public InterceptorCommand(System.Func<object, object, Result.IResult> member, Attributes.CommandAttribute.DataType resultDataType, bool hasReturn)
         {
-            this.method = method;
+            this.member = member;
             this.resultDataType = resultDataType;
             this.hasReturn = hasReturn;
         }
 
-        //===============method==================//
-        readonly System.Func<object, object, Result.IResult> method;
-        public System.Func<object, object, Result.IResult> Method { get { return method; } }
+        //===============member==================//
+        readonly System.Func<object, object, Result.IResult> member;
+        public System.Func<object, object, Result.IResult> Member { get { return member; } }
         //===============resultDataType==================//
         readonly Attributes.CommandAttribute.DataType resultDataType;
         public Attributes.CommandAttribute.DataType ResultDataType { get { return resultDataType; } }

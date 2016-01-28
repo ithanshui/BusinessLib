@@ -99,11 +99,11 @@
         }
 
         [Attributes.NotIntercept]
-        public virtual Authentication.IToken GetToken(object token)
+        public virtual Auth.IToken GetToken(object token)
         {
             if (null == token) { return null; }
 
-            Authentication.Token _token = System.Convert.ToString(token);
+            Auth.Token _token = System.Convert.ToString(token);
 
             if (null == _token) { return null; }
 
@@ -111,8 +111,8 @@
         }
 
         [Attributes.NotIntercept]
-        public virtual Session GetSession<Session>(Authentication.IToken token)
-            where Session : class, Authentication.ISession
+        public virtual Session GetSession<Session>(Auth.IToken token)
+            where Session : class, Auth.ISession
         {
             if (null == token) { return null; }
 
@@ -130,7 +130,7 @@
         }
 
         [Attributes.NotIntercept]
-        public virtual bool CheckCompetence(Authentication.ISession session, string competence)
+        public virtual bool CheckCompetence(Auth.ISession session, string competence)
         {
             return !(null != session.Competences && !session.Competences.Contains(competence));
         }

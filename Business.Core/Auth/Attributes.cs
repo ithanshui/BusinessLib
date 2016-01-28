@@ -254,8 +254,6 @@ namespace Business.Attributes
         {
             if (null == value || System.String.IsNullOrEmpty(value)) { return false; }
 
-            //if (0 < length && length < value.Length) { return false; }
-
             var list = new System.Collections.Generic.List<int>();
             for (int i = 0; i < value.Length; i++) { list.Add(value[i]); }
 

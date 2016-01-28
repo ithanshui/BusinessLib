@@ -1,4 +1,4 @@
-﻿namespace Business.Authentication
+﻿namespace Business.Auth
 {
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class Session : ISession
@@ -105,60 +105,4 @@
             return Extensions.Help.ProtoBufSerialize(this);
         }
     }
-
-    /*
-    public class SysInfo : ISysInfo
-    {
-        public string OS { get; set; }
-
-        public System.Collections.Generic.List<string> Mac { get; set; }
-
-        public string Cpu { get; set; }
-
-        public string Memory { get; set; }
-
-        public string Board { get; set; }
-
-        public string Disk { get; set; }
-
-        public string Browser { get; set; }
-
-        public string Sign { get; set; }
-
-        public override string ToString()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    }
-
-    public struct BoarStruct
-    {
-        public object SerialNumber;
-        public object Manufacturer;
-        public object Product;
-        public object Version;
-    }
-    public struct OSStruct
-    {
-        public object Name;
-        public object Version;
-        public object SystemDirectory;
-    }
-    public struct DiskStruct
-    {
-        public object SerialNumber;
-        public object Model;
-        public object Size;
-    }
-    public struct CpuStruct
-    {
-        public object Name;
-        public object ProcessorId;
-        public object SystemName;
-    }
-    public struct MemoryStruct
-    {
-        public object TotalPhysicalMemory;
-    }
-    */
 }

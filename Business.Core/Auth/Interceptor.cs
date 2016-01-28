@@ -1,14 +1,15 @@
-﻿namespace Business.Authentication
+namespace Business.Auth
 {
-    using Result;
     using Business;
+    using Result;
 
-    public sealed class InterceptorNot : InterceptorNot<ResultBase<string>> { }
+    public sealed class Interceptor : Interceptor<ResultBase<string>, Session> { }
 
-    public class InterceptorNot<Result> : InterceptorBase
+    public class Interceptor<Result, Session> : InterceptorBase
         where Result : class, IResult, new()
+        where Session : class, ISession
     {
-        public InterceptorNot() : base() { }
+        public Interceptor() : base() { }
 
         public override void Intercept(Castle.DynamicProxy.IInvocation invocation)
         {
@@ -21,25 +22,41 @@
             var logType = BusinessLogType.Record;
             var logAttr = meta.BusinessLogAttr;
             var commandAttr = meta.CommandAttr;
-            IToken token = null;
+            Session session = null;
             var i = meta.Arguments.Item1;
+            var i1 = meta.SessionPosition;
 
             try
             {
                 if (0 == arguments.Length)
                 {
                     arguments = null;
-                    invocation.ReturnValue = ResultFactory.Create<Result>(Mark.MarkItem.Exp_ArgumentsIllegal);
-                    logType = BusinessLogType.Exception;
-                    return;
+
+                    invocation.ReturnValue = ResultFactory.Create<Result>(Mark.MarkItem.Exp_ArgumentsIllegal); logType = BusinessLogType.Exception; return;
                 }
 
-                token = this.Business.GetToken(arguments[0]);
+                var token = this.Business.GetToken(arguments[0]);
                 if (null == token)
                 {
-                    invocation.ReturnValue = ResultFactory.Create<Result>(Mark.MarkItem.Exp_SessionIllegal);
-                    logType = BusinessLogType.Exception;
-                    return;
+                    invocation.ReturnValue = ResultFactory.Create<Result>(Mark.MarkItem.Exp_SessionIllegal); logType = BusinessLogType.Exception; return;
+                }
+
+                session = this.Business.GetSession<Session>(token);
+                if (null == session)
+                {
+                    invocation.ReturnValue = ResultFactory.Create<Result>(Mark.MarkItem.Exp_SessionOut); logType = BusinessLogType.Exception; return;
+                }
+
+                // check competence
+                if (!this.Business.CheckCompetence(session, method))
+                {
+                    invocation.ReturnValue = ResultFactory.Create<Result>(Mark.MarkItem.Exp_CompetenceIllegal); logType = BusinessLogType.Exception; return;
+                }
+
+                // set session
+                if (-1 < i1)
+                {
+                    arguments[i1] = session;
                 }
 
                 if (1 < arguments.Length && null != arguments[1])
@@ -51,7 +68,7 @@
                         {
                             arguments[i] = commandAttr.Deserialize(((Extensions.CommandAgs)arguments[1]).Ags, meta.Arguments.Item2);
                         }
-                        else if (null != deserialize) 
+                        else if (null != deserialize)
                         {
                             arguments[i] = deserialize.Deserialize(arguments[1], meta.Arguments.Item2);
                         }
@@ -70,19 +87,23 @@
                     }
                 }
 
+                //===============================//
                 startTime.Restart();
                 invocation.Proceed();
-
             }
             catch (System.Exception ex)
             {
-                logType = BusinessLogType.Exception;
                 invocation.ReturnValue = ResultFactory.Create<Result>(0, System.Convert.ToString(ex));
+                logType = BusinessLogType.Exception;
             }
             finally
             {
                 startTime.Stop();
 
+                if (-1 < i1)
+                {
+                    arguments[i1] = null;
+                }
                 if (-1 < i)
                 {
                     arguments[i] = null;
@@ -92,49 +113,27 @@
                 {
                     if (logType == BusinessLogType.Exception)
                     {
-                        if (null == token)
+                        if (null == session)
                         {
                             this.Business.WriteLogAsync.BeginInvoke(new BusinessLogData(logType, null, null, arguments, invocation.ReturnValue, startTime.Elapsed.TotalSeconds, method, null), null, null);
                         }
                         else
                         {
-                            this.Business.WriteLogAsync.BeginInvoke(new BusinessLogData(logType, null, token.Key, arguments, invocation.ReturnValue, startTime.Elapsed.TotalSeconds, method, token.IP), null, null);
+                            this.Business.WriteLogAsync.BeginInvoke(new BusinessLogData(logType, session.Key, session.Account, arguments, invocation.ReturnValue, startTime.Elapsed.TotalSeconds, method, session.IP), null, null);
                         }
                     }
                     else if (!this.BusinessLogAttr.NotRecord && !logAttr.NotRecord)
                     {
-                        if (null == token)
+                        if (null == session)
                         {
                             this.Business.WriteLogAsync.BeginInvoke(new BusinessLogData(logType, null, null, (!this.BusinessLogAttr.NotValue && !logAttr.NotValue) ? arguments : null, (!this.BusinessLogAttr.NotResult && !logAttr.NotResult) ? invocation.ReturnValue : null, startTime.Elapsed.TotalSeconds, method, null), null, null);
                         }
                         else
                         {
-                            this.Business.WriteLogAsync.BeginInvoke(new BusinessLogData(logType, null, token.Key, (!this.BusinessLogAttr.NotValue && !logAttr.NotValue) ? arguments : null, (!this.BusinessLogAttr.NotResult && !logAttr.NotResult) ? invocation.ReturnValue : null, startTime.Elapsed.TotalSeconds, method, token.IP), null, null);
+                            this.Business.WriteLogAsync.BeginInvoke(new BusinessLogData(logType, session.Key, session.Account, (!this.BusinessLogAttr.NotValue && !logAttr.NotValue) ? arguments : null, (!this.BusinessLogAttr.NotResult && !logAttr.NotResult) ? invocation.ReturnValue : null, startTime.Elapsed.TotalSeconds, method, session.IP), null, null);
                         }
                     }
                 }
-                //if (this.IsLogRecord || logType == Log.LogType.Exception)
-                //{
-                //    if (null == token)
-                //    {
-                //        log.WriteAsync(logType, null, null, arguments, invocation.ReturnValue, startTime.Elapsed.TotalSeconds, method, null);
-                //    }
-                //    else
-                //    {
-                //        log.WriteAsync(logType, null, token.Site, arguments, invocation.ReturnValue, startTime.Elapsed.TotalSeconds, method, token.IP);
-                //    }
-                //}
-                //else
-                //{
-                //    if (null == token)
-                //    {
-                //        log.WriteAsync(logType, null, null, null, null, startTime.Elapsed.TotalSeconds, method, null);
-                //    }
-                //    else
-                //    {
-                //        log.WriteAsync(logType, null, token.Site, null, null, startTime.Elapsed.TotalSeconds, method, token.IP);
-                //    }
-                //}
             }
         }
     }

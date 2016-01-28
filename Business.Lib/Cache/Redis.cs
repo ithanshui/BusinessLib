@@ -3,33 +3,8 @@ using System.Linq;
 
 namespace Business.Cache
 {
-    //using Business.Extensions;
-
-    //private static ConnectionMultiplexer _redis;
-    //private static IDatabase _db;
-    //private static IServer _server;
-    //private static bool needSave = false;
-    //private void Init(string host, int port, string pwd, int database)
-    //{
-    //var options = ConfigurationOptions.Parse(host + ":" + port);
-    //options.SyncTimeout = int.MaxValue;
-    //options.AllowAdmin = true;
-    //if (!string.IsNullOrEmpty(pwd))
-    //{
-    //    options.Password = pwd;
-    //}
-    //if (_redis == null)
-    //    _redis = ConnectionMultiplexer.Connect(options);
-    //if (_server == null)
-    //    _server = _redis.GetServer(host + ":" + port);
-    //if (_db == null)
-    //    _db = _redis.GetDatabase(database);
-    //needSave = false;
-    //}
-
     public class Redis : ICache
     {
-        //static string connString;
         static ConfigurationOptions cfgOpt;
         static ConnectionMultiplexer connection;
 
@@ -76,11 +51,6 @@ namespace Business.Cache
         {
             return key.Select<string, RedisValue>(c => c).ToArray();
         }
-
-        //public long Count(int db = 0)
-        //{
-        //    return Connection.GetServer(Connection.GetEndPoints()[0]).Keys(db).Count();
-        //}
 
         public System.Collections.Generic.IEnumerable<RedisKey> Keys(int endPoint = 0, string pattern = null)
         {
