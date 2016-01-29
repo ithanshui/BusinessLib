@@ -1,4 +1,21 @@
-﻿namespace Business.Extensions
+﻿/*==================================
+             ########   
+            ##########           
+                                              
+             ########             
+            ##########            
+          ##############         
+         #######  #######        
+        ######      ######       
+        #####        #####       
+        ####          ####       
+        ####   ####   ####       
+        #####  ####  #####       
+         ################        
+          ##############                                                 
+==================================*/
+
+namespace Business.Extensions
 {
     public static class Command
     {
@@ -142,7 +159,7 @@
                     }
                 }
 
-                var _token = new Auth.Token { Key = key ? commandId : "WebSocket", IP = ip }.ToString();
+                var _token = new Auth.Token { Key = key ? commandId : "Socket", IP = ip }.ToString();
 
                 result = commandMeta.Member(_token, data);
 

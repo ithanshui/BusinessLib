@@ -1,4 +1,21 @@
-﻿namespace Business.Extensions
+﻿/*==================================
+             ########   
+            ##########           
+                                              
+             ########             
+            ##########            
+          ##############         
+         #######  #######        
+        ######      ######       
+        #####        #####       
+        ####          ####       
+        ####   ####   ####       
+        #####  ####  #####       
+         ################        
+          ##############                                                 
+==================================*/
+
+namespace Business.Extensions
 {
     public class BusinessAllMethodsHook : Castle.DynamicProxy.AllMethodsHook
     {
@@ -296,7 +313,6 @@
     {
         public InterceptorMetaData(int sessionPosition, System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute> arguments, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> memberAccessor, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>> checkedAtts, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>> argumentAtts, Attributes.BusinessLogAttribute logAttr, Attributes.CommandAttribute commandAttr, string fullName, bool hasReturn)
         {
-            //this.method = method;
             this.sessionPosition = sessionPosition;
             this.arguments = arguments;
             this.memberAccessor = memberAccessor;
@@ -308,9 +324,6 @@
             this.hasReturn = hasReturn;
         }
 
-        ////===============method==================//
-        //readonly System.Func<object, object, Result.IResult> method;
-        //public System.Func<object, object, Result.IResult> Method { get { return method; } }
         //===============session==================//
         readonly int sessionPosition;
         public int SessionPosition { get { return sessionPosition; } }

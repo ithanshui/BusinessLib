@@ -1,4 +1,21 @@
-﻿namespace Business.Result
+﻿/*==================================
+             ########   
+            ##########           
+                                              
+             ########             
+            ##########            
+          ##############         
+         #######  #######        
+        ######      ######       
+        #####        #####       
+        ####          ####       
+        ####   ####   ####       
+        #####  ####  #####       
+         ################        
+          ##############                                                 
+==================================*/
+
+namespace Business.Result
 {
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class ResultBase<DataType> : IResult<DataType>
