@@ -1,18 +1,18 @@
 ﻿/*==================================
-             ########   
-            ##########           
-                                              
-             ########             
-            ##########            
-          ##############         
-         #######  #######        
-        ######      ######       
-        #####        #####       
-        ####          ####       
-        ####   ####   ####       
-        #####  ####  #####       
-         ################        
-          ##############                                                 
+             ########
+            ##########
+
+             ########
+            ##########
+          ##############
+         #######  #######
+        ######      ######
+        #####        #####
+        ####          ####
+        ####   ####   ####
+        #####  ####  #####
+         ################
+          ##############
 ==================================*/
 
 namespace Business.Extensions
@@ -44,6 +44,24 @@ namespace Business.Extensions
             public byte[] Data { get; set; }
         }
 
+        public class MemberData
+        {
+            /// <summary>
+            /// Gets the cmd of this request.
+            /// </summary>
+            public string Cmd { get; set; }
+
+            /// <summary>
+            /// Gets the Command token of this request, used for callback
+            /// </summary>
+            public string Token { get; set; }
+
+            /// <summary>
+            /// Gets the data of this request.
+            /// </summary>
+            public object Data { get; set; }
+        }
+
         /// <summary>
         /// {cmd-callbackToken-BusinessLibKey-data}
         /// </summary>
@@ -73,16 +91,10 @@ namespace Business.Extensions
             // token
             var cmd = System.String.Empty;// cmd -
             var token = System.String.Empty;// Socket token -
-            //string key;// BusinessLib key -
 
             var headData = headChar.Split(HeadSplit);
             switch (headData.Length)
             {
-                //case 3://Login
-                //    cmd = headData[0];//cmd
-                //    token = headData[1];//callback
-                //    key = headData[2];//login
-                //    break;
                 case 2://Not Login
                     cmd = headData[0];//cmd
                     token = headData[1];//callback
@@ -122,6 +134,7 @@ namespace Business.Extensions
             if ("Login".Equals(cmd, System.StringComparison.InvariantCultureIgnoreCase))
             {
                 var _value = System.Text.Encoding.UTF8.GetString(data);
+
                 string _error = null;
                 var _result = command.Business.Login(_value, out _error, commandId);
 
@@ -133,7 +146,7 @@ namespace Business.Extensions
                 {
                     result = Result.ResultFactory.Create(System.Text.Encoding.UTF8.GetBytes(_result));
 
-                    commandMeta = new InterceptorCommand(null, Attributes.CommandAttribute.DataType.Byte, false);
+                    //commandMeta = new InterceptorCommand(null, Attributes.CommandAttribute.DataType.Byte, false);
                 }
 
                 return result;
@@ -161,15 +174,72 @@ namespace Business.Extensions
 
                 var _token = new Auth.Token { Key = key ? commandId : "Socket", IP = ip }.ToString();
 
-                result = commandMeta.Member(_token, data);
-
                 //Result
-                if (commandMeta.HasReturn && !System.String.IsNullOrEmpty(token))
+                return commandMeta.Member(_token, data);
+
+                ////Result
+                //if (commandMeta.HasReturn && !System.String.IsNullOrEmpty(token))
+                //{
+                //    return result;
+                //}
+
+                //return null;
+            }
+        }
+
+        public static Result.IResult GetMemberResult(Auth.IInterception command, Auth.IInterception commandNot, string ip, MemberData memberData)
+        {
+            var cmd = memberData.Cmd;
+            var token = memberData.Token;
+            var data = memberData.Data;
+
+            if (null == cmd) { return Result.ResultFactory.Create((int)Mark.MarkItem.Command_KeyError, "Cmd Error"); }
+
+            Result.IResult result;
+
+            System.Func<object, object, Result.IResult> commandMeta;
+
+            if ("Login".Equals(cmd, System.StringComparison.InvariantCultureIgnoreCase))
+            {
+                string _error = null;
+                var _result = command.Business.Login(System.Convert.ToString(data), out _error);
+
+                if (!System.String.IsNullOrEmpty(_error))
                 {
-                    return result;
+                    result = Result.ResultFactory.Create((int)Mark.MarkItem.Login_Error, _error);
+                }
+                else
+                {
+                    result = Result.ResultFactory.Create(_result);
                 }
 
-                return null;
+                return result;
+            }
+            else
+            {
+                var hasKey = !System.String.IsNullOrEmpty(token);
+
+                if (hasKey)//Interceptor
+                {
+                    if (!command.Member.TryGetValue(cmd, out commandMeta))
+                    {
+                        result = Result.ResultFactory.Create((int)Mark.MarkItem.Command_KeyError, string.Format("Not Cmd {0}", cmd));
+                        return result;
+                    }
+                }
+                else//InterceptorNot
+                {
+                    if (!commandNot.Member.TryGetValue(cmd, out commandMeta))
+                    {
+                        result = Result.ResultFactory.Create((int)Mark.MarkItem.Command_KeyError, string.Format("Not Cmd {0}", cmd));
+                        return result;
+                    }
+                }
+
+                var _token = new Auth.Token { Key = hasKey ? token : "Service", IP = ip }.ToString();
+
+                //Result
+                return commandMeta(_token, data);
             }
         }
 

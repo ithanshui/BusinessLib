@@ -1,18 +1,18 @@
 ﻿/*==================================
-             ########   
-            ##########           
-                                              
-             ########             
-            ##########            
-          ##############         
-         #######  #######        
-        ######      ######       
-        #####        #####       
-        ####          ####       
-        ####   ####   ####       
-        #####  ####  #####       
-         ################        
-          ##############                                                 
+             ########
+            ##########
+
+             ########
+            ##########
+          ##############
+         #######  #######
+        ######      ######
+        #####        #####
+        ####          ####
+        ####   ####   ####
+        #####  ####  #####
+         ################
+          ##############
 ==================================*/
 
 namespace Business.Extensions
@@ -81,7 +81,7 @@ namespace Business.Extensions
             foreach (var item in methods)
             {
                 var notInterceptAttrs = GetAttributes<Attributes.NotInterceptAttribute>(item);
-                if (0 < notInterceptAttrs.Length)
+                if (0 < notInterceptAttrs.Length || (!typeof(void).Equals(item.ReturnType) && !typeof(Result.IResult).Equals(item.ReturnType)))
                 {
                     notList.Add(item);
                 }
@@ -217,7 +217,7 @@ namespace Business.Extensions
                 //======CmdAttribute======//
                 Attributes.CommandAttribute commandAttr = CmdAttr(item, item.Name);
 
-                var metaData = new InterceptorMetaData(System.Array.FindIndex(agsTypes, p => typeof(Auth.ISession).IsAssignableFrom(p)), new System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute>(i, agsType, attr, deserialize), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>>(), logAttr, commandAttr, item.GetMethodFullName(), !typeof(void).Equals(item.ReturnType.FullName));
+                var metaData = new InterceptorMetaData(System.Array.FindIndex(agsTypes, p => typeof(Auth.ISession).IsAssignableFrom(p)), new System.Tuple<int, System.Type, Attributes.ArgumentsAttribute, Attributes.DeserializeAttribute>(i, agsType, attr, deserialize), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.CheckedAttribute>>>(), new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Collections.Generic.List<Attributes.ArgumentAttribute>>>(), logAttr, commandAttr, item.GetMethodFullName(), !typeof(void).Equals(item.ReturnType));
 
                 if (-1 < i)
                 {
@@ -275,7 +275,7 @@ namespace Business.Extensions
                 var parameters = GetParameters(item);
                 var agsObjs = parameters.Item2;
 
-                var command = new InterceptorCommand(new System.Func<object, object, Result.IResult>((token, arguments) => cmstar.RapidReflection.Emit.MethodInvokerGenerator.CreateDelegate(proxy.GetType().GetMethod(item.Name), false)(proxy, GetAgsObj(agsObjs, token, new CommandAgs(arguments))) as Result.IResult), commandAttr.ResultDataType, !typeof(void).Equals(item.ReturnType.FullName));
+                var command = new InterceptorCommand(new System.Func<object, object, Result.IResult>((token, arguments) => cmstar.RapidReflection.Emit.MethodInvokerGenerator.CreateDelegate(proxy.GetType().GetMethod(item.Name), false)(proxy, GetAgsObj(agsObjs, token, new CommandAgs(arguments))) as Result.IResult), commandAttr.ResultDataType, !typeof(void).Equals(item.ReturnType));
 
                 if (!interceptorCommand.TryAdd(commandAttr.OnlyName, command)) { throw new System.Exception(string.Format("Command Name Exists {0}!", commandAttr.OnlyName)); }
             }

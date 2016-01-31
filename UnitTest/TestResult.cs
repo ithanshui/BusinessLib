@@ -254,7 +254,8 @@ namespace UnitTest
         {
             if (null == token) { return null; }
 
-            var _token = Help.JsonDeserialize<Token>(System.Convert.ToString(token));
+            Token _token = System.Convert.ToString(token);
+
             if (null == _token) { return null; }
 
             return _token;
@@ -284,13 +285,13 @@ namespace UnitTest
 
         #endregion
 
-        public virtual void Test1(object token, object arguments = null) { }
-        public virtual IResult Test2(object token, object arguments = null, ISession<List<string>> session = null) { return ResultFactory.Create(); }
+        public virtual void Test1(string token, object arguments = null) { }
+        public virtual IResult Test2(string token, object arguments = null, ISession<List<string>> session = null) { return ResultFactory.Create(); }
 
         //[Command("H2", ResultDataType = CommandAttribute.DataType.ProtoBuf)]
         [ProtoBufCommand("H2", ResultDataType = CommandAttribute.DataType.ProtoBuf)]
         //[JsonCommand("H2", ResultDataType = CommandAttribute.DataType.ProtoBuf)]
-        public virtual IResult Test3(object token, object arguments = null, ISession<List<string>> session = null, Parameters.Register ags = default(Parameters.Register))
+        public virtual IResult Test3(string token, object arguments = null, ISession<List<string>> session = null, Parameters.Register ags = default(Parameters.Register))
         {
             //data
             /*
@@ -332,6 +333,11 @@ namespace UnitTest
 
             return result2;
         }
+
+        public virtual string Test4(string token, object arguments = null, ISession<List<string>> session = null, Parameters.Register ags = default(Parameters.Register))
+        {
+            return System.String.Empty;
+        }
     }
 
     public class BusinessMember1 : BusinessBase<Data, Business.Log.NLogAdapter, Business.Cache.ICache>
@@ -354,7 +360,7 @@ namespace UnitTest
 
             try
             {
-                if (System.String.IsNullOrEmpty(value)) { return System.String.Empty; }
+                if (System.String.IsNullOrEmpty(value)) { error = Mark.Get<string>(Mark.MarkItem.Exp_UserError); return System.String.Empty; }
 
                 Session session = value;
 
@@ -374,7 +380,7 @@ namespace UnitTest
                 session.Time = time;
                 this.Cache.Set(session.Key, session.ToBytes(), TimeSpan.FromMinutes(1440));
                 //Relation key
-                this.Cache.Set(session.Account, session.Key, TimeSpan.FromMinutes(1440));
+                //this.Cache.Set(session.Account, session.Key, TimeSpan.FromMinutes(1440));
 
                 return key;
             }
@@ -391,7 +397,8 @@ namespace UnitTest
         {
             if (null == token) { return null; }
 
-            var _token = Help.JsonDeserialize<Token>(System.Convert.ToString(token));
+            Token _token = System.Convert.ToString(token);
+
             if (null == _token) { return null; }
 
             return _token;
@@ -422,7 +429,7 @@ namespace UnitTest
         #endregion
 
         [ProtoBufCommand("H2", ResultDataType = CommandAttribute.DataType.ProtoBuf)]
-        public virtual IResult Test3(object token, object arguments = null, Session session = null, Parameters.Register ags = default(Parameters.Register))
+        public virtual IResult Test3(string token, object arguments = null, Session session = null, Parameters.Register ags = default(Parameters.Register))
         {
             //data
             /*
@@ -539,6 +546,7 @@ namespace UnitTest
 
             var rrr = Common.Interceptor.Member["Test3"](token, ps.ToString());
             //var rrr = Common.Interceptor.Instance.Test3(token, ps.ToString());
+            //var rrr1 = Common.Interceptor.Instance.Test4(token, ps.ToString());
 
             var json = rrr.ToString();
 
