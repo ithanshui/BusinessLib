@@ -112,7 +112,7 @@ namespace Business.Extensions
             return new CommandData { Cmd = cmd, Token = token, Key = key, Data = _data };
         }
 
-        public static Result.IResult GetCommandResult(this byte[] value, Auth.IInterception command, Auth.IInterception commandNot, string ip, string commandId, out Extensions.InterceptorCommand commandMeta, out CommandData commandData)
+        public static Result.IResult CommandCall(this byte[] value, Auth.IInterception command, Auth.IInterception commandNot, string ip, string commandId, out Extensions.InterceptorCommand commandMeta, out CommandData commandData)
         {
             commandMeta = default(Extensions.InterceptorCommand);
             string error = null;
@@ -187,7 +187,7 @@ namespace Business.Extensions
             }
         }
 
-        public static Result.IResult GetMemberResult(Auth.IInterception command, Auth.IInterception commandNot, string ip, MemberData memberData)
+        public static Result.IResult MemberCall(Auth.IInterception command, Auth.IInterception commandNot, string ip, MemberData memberData)
         {
             var cmd = memberData.Cmd;
             var token = memberData.Token;
@@ -243,11 +243,11 @@ namespace Business.Extensions
             }
         }
 
-        public static byte[] GetCommandResult(this byte[] value, Auth.IInterception command, Auth.IInterception commandNot, string ip, string commandId)
+        public static byte[] CommandCall(this byte[] value, Auth.IInterception command, Auth.IInterception commandNot, string ip, string commandId)
         {
             Extensions.InterceptorCommand commandMeta;
             CommandData commandData;
-            var result = GetCommandResult(value, command, commandNot, ip, commandId, out commandMeta, out commandData);
+            var result = CommandCall(value, command, commandNot, ip, commandId, out commandMeta, out commandData);
 
             if (null == result) { return null; }
 
@@ -336,7 +336,7 @@ namespace Business.Extensions
             public byte[] Data { get; set; }
         }
 
-        public static CommandResult GetCommandResult(byte[] value)
+        public static CommandResult CommandCall(byte[] value)
         {
             var stateData = new byte[2];
             System.Buffer.BlockCopy(value, 0, stateData, 0, stateData.Length);

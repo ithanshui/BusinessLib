@@ -48,7 +48,7 @@ namespace UnitTest
         static byte[] SocketServer(byte[] value)
         {
             var ip = "192.168.1.111";
-            var result = Command.GetCommandResult(value, Common.Interceptor1, null, ip, SessionID);
+            var result = Command.CommandCall(value, Common.Interceptor1, null, ip, SessionID);
 
             if (null != result)
             {
@@ -65,14 +65,14 @@ namespace UnitTest
         {
             var vaele = GetToken1();
 
-            var command = Command.GetCommandResult(vaele);
+            var command = Command.CommandCall(vaele);
 
             Result(command);
             //=================================//
             var ps = Parameter();
             var value = Command.GetCommandData("H2", "H2Token", true, ps.ToBytes());
 
-            command = Command.GetCommandResult(SocketServer(value));
+            command = Command.CommandCall(SocketServer(value));
 
             Result(command);
         }
