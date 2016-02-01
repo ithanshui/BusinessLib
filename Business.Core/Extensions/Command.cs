@@ -57,6 +57,11 @@ namespace Business.Extensions
             public string Token { get; set; }
 
             /// <summary>
+            /// Gets the login key of this request.
+            /// </summary>
+            public bool Key { get; set; }
+
+            /// <summary>
             /// Gets the data of this request.
             /// </summary>
             public object Data { get; set; }
@@ -191,6 +196,7 @@ namespace Business.Extensions
         {
             var cmd = memberData.Cmd;
             var token = memberData.Token;
+            var key = memberData.Key;
             var data = memberData.Data;
 
             if (null == cmd) { return Result.ResultFactory.Create((int)Mark.MarkItem.Command_KeyError, "Cmd Error"); }
@@ -217,9 +223,7 @@ namespace Business.Extensions
             }
             else
             {
-                var hasKey = !System.String.IsNullOrEmpty(token);
-
-                if (hasKey)//Interceptor
+                if (key)//Interceptor
                 {
                     if (!command.Member.TryGetValue(cmd, out commandMeta))
                     {
@@ -236,7 +240,7 @@ namespace Business.Extensions
                     }
                 }
 
-                var _token = new Auth.Token { Key = hasKey ? token : "Service", IP = ip }.ToString();
+                var _token = new Auth.Token { Key = key ? token : "Service", IP = ip }.ToString();
 
                 //Result
                 return commandMeta(_token, data);
