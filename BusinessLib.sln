@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RESTTest", "RESTTest\RESTTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLib", "TestLib\TestLib.csproj", "{93C3533B-45CC-47F3-B667-0F302DE76974}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketTest", "SocketTest\SocketTest.csproj", "{E31D228E-3692-45A0-8C81-DF879EF0DEF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{93C3533B-45CC-47F3-B667-0F302DE76974}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93C3533B-45CC-47F3-B667-0F302DE76974}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93C3533B-45CC-47F3-B667-0F302DE76974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E31D228E-3692-45A0-8C81-DF879EF0DEF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E31D228E-3692-45A0-8C81-DF879EF0DEF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E31D228E-3692-45A0-8C81-DF879EF0DEF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E31D228E-3692-45A0-8C81-DF879EF0DEF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
