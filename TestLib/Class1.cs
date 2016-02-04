@@ -5,6 +5,8 @@ using Business.Extensions;
 using Business.Auth;
 using Business.Result;
 using Business.Attributes;
+using Business.Data;
+using Business.Entity;
 using System.Collections.Generic;
 using ProtoBuf;
 using NLog;
@@ -18,7 +20,7 @@ namespace TestLib
 {
     #region Data
 
-    public class Data : Business.Data.DataBase<DataConnection>
+    public class Data : DataBase<DataConnection>
     {
         public override DataConnection GetConnection()
         {
@@ -26,7 +28,7 @@ namespace TestLib
         }
     }
 
-    public class DataConnection : Business.Data.LinqToDBConnection<Entitys>
+    public class DataConnection : LinqToDBConnection<Entitys>
     {
         readonly static IDataProvider provider = new LinqToDB.DataProvider.MySql.MySqlDataProvider();
         readonly static string conString = "server=192.168.0.110;uid=test;pwd=123456;database=test";
@@ -57,7 +59,7 @@ namespace TestLib
     #region Entitys
 
     [Table(Name = "songs")]
-    public class songs : Business.Entity.EntityBase
+    public class songs : EntityBase
     {
         [Column(Name = "songs_name"), NotNull]
         public string songs_name { get; set; }
@@ -93,44 +95,26 @@ namespace TestLib
 
     public class Parameters
     {
-        [ProtoBuf.ProtoContract(SkipConstructor = true)]
-        //[Deserialize(TrimAllChar = true)]
-        //[ProtoBuf(TrimAllChar = true)]
         [Json(TrimAllChar = true)]
         public struct Register
         {
-            [ProtoBuf.ProtoMember(1)]
             [CanNotNull(-11)]
             [Size(12, "\"account\" length verification failed. min 4, max 8", Min = 4, Max = "8")]
             [CheckChar(-13, Mode = CheckCharAttribute.CheckCharMode.All)]
             public string account;
 
-            [ProtoBuf.ProtoMember(2)]
             [CanNotNull(-14)]
             [Size(15, Min = 4, Max = 8)]
             public string password;
 
-            [ProtoBuf.ProtoMember(3)]
             [CheckEmail(16)]
             [Size(-17, Min = 4, Max = 32)]
             public string email;
 
-            [ProtoBuf.ProtoMember(4)]
             public List<string> d1;
 
-            [ProtoBuf.ProtoMember(5)]
             [Size(-19, Min = 4, Max = 8)]
             public int[] d2;
-
-            public override string ToString()
-            {
-                return JsonConvert.SerializeObject(this);
-            }
-
-            public byte[] ToBytes()
-            {
-                return Help.ProtoBufSerialize(this);
-            }
         }
     }
 
@@ -146,16 +130,15 @@ namespace TestLib
     public class BusinessMember : BusinessBase<Data, Business.Log.NLogAdapter, Business.Cache.ICache>
     {
         public BusinessMember()
-            : base(Common.OnlyData, Common.OnlyLog, Common.OnlyCache, () =>
-            { })
+            : base(Common.OnlyData, Common.OnlyLog, Common.OnlyCache)
         {
             this.WriteLogAsync = x =>
             {
-                System.Console.WriteLine(x);
+                this.Log.Debug(x.ToString());
             };
         }
 
-        #region Optional override Login Session Token Competence
+        #region Optional override Login Session
 
         public override string Login(string value, out string error, string cmdId = null)
         {
@@ -194,17 +177,7 @@ namespace TestLib
             }
         }
 
-        public override IToken GetToken(object token)
-        {
-            if (null == token) { return null; }
-
-            Token _token = System.Convert.ToString(token);
-
-            if (null == _token) { return null; }
-
-            return _token;
-        }
-
+        /*           ==========Base achieve==========
         public override Session GetSession<Session>(Business.Auth.IToken token)
         {
             if (null == token) { return null; }
@@ -221,11 +194,7 @@ namespace TestLib
 
             return session;
         }
-
-        public override bool CheckCompetence(ISession session, string competence)
-        {
-            return !(null != session.Competences && !session.Competences.Contains(competence));
-        }
+        */
 
         #endregion
 
