@@ -27,6 +27,28 @@ namespace Business.Data
     public abstract class LinqToDBConnection<IEntity> : LinqToDB.Data.DataConnection, Data.IConnection
         where IEntity : class, Data.IEntity
     {
+        static int ForEach<T>(System.Collections.Generic.IEnumerable<T> obj, System.Func<T, int> func)
+        {
+            var count = 0;
+
+            foreach (var item in obj)
+            {
+                var result = func(item);
+
+                if (-1 == result)
+                {
+                    count = result;
+                    break;
+                }
+                else
+                {
+                    count += result;
+                }
+            }
+
+            return count;
+        }
+
         public LinqToDBConnection(LinqToDB.DataProvider.IDataProvider provider, string conString)
             : base(provider, conString) { }
 
@@ -57,69 +79,49 @@ namespace Business.Data
             base.RollbackTransaction();
         }
 
-        public int Save<T>(System.Collections.IEnumerable obj)
+        public int Save<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.Insert<T>(this, (T)obj1); }, obj);
+            return this.Execute(() => { return ForEach(obj, (item) => { return DataExtensions.Insert(this, item); }); });
         }
 
         public int Save<T>(T obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.Insert<T>(this, (T)obj); });
+            return this.Execute(() => { return DataExtensions.Insert(this, obj); });
         }
 
-        public int SaveOrUpdate<T>(System.Collections.IEnumerable obj)
+        public int SaveOrUpdate<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.InsertOrReplace<T>(this, (T)obj1); }, obj);
+            return this.Execute(() => { return ForEach(obj, (item) => { return DataExtensions.InsertOrReplace(this, item); }); });
         }
 
         public int SaveOrUpdate<T>(T obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.InsertOrReplace<T>(this, (T)obj); });
+            return this.Execute(() => { return DataExtensions.InsertOrReplace(this, obj); });
         }
 
-        public int Update<T>(System.Collections.IEnumerable obj)
+        public int Update<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.Update<T>(this, (T)obj1); }, obj);
+            return this.Execute(() => { return ForEach(obj, (item) => { return DataExtensions.Update(this, item); }); });
         }
 
         public int Update<T>(T obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.Update<T>(this, (T)obj); });
+            return this.Execute(() => { return DataExtensions.Update(this, obj); });
         }
 
-        public int Delete<T>(System.Collections.IEnumerable obj)
+        public int Delete<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.Delete<T>(this, (T)obj1); }, obj);
+            return this.Execute(() => { return ForEach(obj, (item) => { return DataExtensions.Delete(this, item); }); });
         }
 
         public int Delete<T>(T obj)
         {
-            return this.Execute((obj1) => { return DataExtensions.Delete<T>(this, (T)obj); });
+            return this.Execute(() => { return DataExtensions.Delete(this, obj); });
         }
 
         public void BulkCopy<T>(System.Collections.Generic.IEnumerable<T> source)
         {
             LinqToDB.Data.DataConnectionExtensions.BulkCopy<T>(this, source);
-        }
-
-        public T Execute<T>(string sql, params DataParameter[] parameters)
-        {
-            return LinqToDB.Data.DataConnectionExtensions.Execute<T>(this, sql, parameters.Select(c => new LinqToDB.Data.DataParameter(c.Name, c.Value)).ToArray());
-        }
-
-        public int Execute(string sql, params DataParameter[] parameters)
-        {
-            return LinqToDB.Data.DataConnectionExtensions.Execute(this, sql, parameters.Select(c => new LinqToDB.Data.DataParameter(c.Name, c.Value)).ToArray());
-        }
-
-        public int ExecuteNonQuery(string commandText, System.Data.CommandType commandType = System.Data.CommandType.Text, params DataParameter[] parameter)
-        {
-            return DataConnectionEx.ExecuteNonQuery(this, commandText, commandType, parameter);
-        }
-
-        public T ExecuteScalar<T>(string commandText, System.Data.CommandType commandType = System.Data.CommandType.Text, params DataParameter[] parameter)
-        {
-            return DataConnectionEx.ExecuteScalar<T>(this, commandText, commandType, parameter);
         }
 
         public new void Dispose()

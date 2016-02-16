@@ -6,7 +6,7 @@ using Business.Auth;
 using Business.Result;
 using Business.Attributes;
 using Business.Data;
-using Business.Entity;
+using Business.Data;
 using System.Collections.Generic;
 using ProtoBuf;
 using NLog;
@@ -59,7 +59,7 @@ namespace TestLib
     #region Entitys
 
     [Table(Name = "songs")]
-    public class songs : EntityBase
+    public class songs : MongoDBEntity
     {
         [Column(Name = "songs_name"), NotNull]
         public string songs_name { get; set; }

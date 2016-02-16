@@ -19,6 +19,20 @@ namespace Business.Extensions
 {
     public static class Help
     {
+        /// <summary>
+        ///   Gets the attributes.
+        /// </summary>
+        /// <param name = "member">The member.</param>
+        /// <returns>The member attributes.</returns>
+        internal static T[] GetAttributes<T>(this System.Reflection.ICustomAttributeProvider member, bool inherit = true) where T : class
+        {
+            if (typeof(T) != typeof(object))
+            {
+                return (T[])member.GetCustomAttributes(typeof(T), inherit);
+            }
+            return (T[])member.GetCustomAttributes(inherit);
+        }
+
         public static System.IO.MemoryStream StreamCopy(this System.IO.Stream stream)
         {
             var outStream = new System.IO.MemoryStream();

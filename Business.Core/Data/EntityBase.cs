@@ -17,7 +17,7 @@
 
 using System.Linq;
 
-namespace Business.Entity
+namespace Business.Data
 {
     public abstract class EntityBase
     {
@@ -61,12 +61,12 @@ namespace Business.Entity
                 {
                     foreach (var item in members)
                     {
-                        if (meta.MemberAccessor.ContainsKey(item)) { member.Add(meta.MemberAccessor[item]); }
+                        if (meta.Accessor.ContainsKey(item)) { member.Add(meta.Accessor[item]); }
                     }
                 }
                 else
                 {
-                    member.AddRange(meta.MemberAccessor.Values);
+                    member.AddRange(meta.Accessor.Values);
                 }
 
                 if (0 < member.Count)
@@ -102,12 +102,12 @@ namespace Business.Entity
                 {
                     foreach (var item in members)
                     {
-                        if (meta.MemberAccessor.ContainsKey(item)) { member.Add(meta.MemberAccessor[item]); }
+                        if (meta.Accessor.ContainsKey(item)) { member.Add(meta.Accessor[item]); }
                     }
                 }
                 else
                 {
-                    member.AddRange(meta.MemberAccessor.Values);
+                    member.AddRange(meta.Accessor.Values);
                 }
 
                 //var member = meta.MemberAccessor.Where(c => 0 < members.Length ? members.Contains(c.Key) : true);
@@ -134,32 +134,32 @@ namespace Business.Entity
 
         static Member GetMetaData(System.Type type)
         {
-            var member = new Member(new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>());
+            var member = new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>>();
 
             var fields = type.GetFields();
             foreach (var field in fields)
             {
-                member.MemberAccessor.Add(field.Name, System.Tuple.Create(field.FieldType, cmstar.RapidReflection.Emit.FieldAccessorGenerator.CreateGetter(field), cmstar.RapidReflection.Emit.FieldAccessorGenerator.CreateSetter(field)));
+                member.Add(field.Name, System.Tuple.Create(field.FieldType, cmstar.RapidReflection.Emit.FieldAccessorGenerator.CreateGetter(field), cmstar.RapidReflection.Emit.FieldAccessorGenerator.CreateSetter(field)));
             }
 
             var propertys = type.GetProperties();
             foreach (var property in propertys)
             {
-                member.MemberAccessor.Add(property.Name, System.Tuple.Create(property.PropertyType, cmstar.RapidReflection.Emit.PropertyAccessorGenerator.CreateGetter(property), cmstar.RapidReflection.Emit.PropertyAccessorGenerator.CreateSetter(property)));
+                member.Add(property.Name, System.Tuple.Create(property.PropertyType, cmstar.RapidReflection.Emit.PropertyAccessorGenerator.CreateGetter(property), cmstar.RapidReflection.Emit.PropertyAccessorGenerator.CreateSetter(property)));
             }
 
-            return member;
+            return new Member(member);
         }
 
         public struct Member
         {
-            public Member(System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> memberAccessor)
+            public Member(System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> accessor)
             {
-                this.memberAccessor = memberAccessor;
+                this.accessor = accessor;
             }
 
-            readonly System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> memberAccessor;
-            public System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> MemberAccessor { get { return memberAccessor; } }
+            readonly System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> accessor;
+            public System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> Accessor { get { return accessor; } }
         }
 
         public override string ToString()

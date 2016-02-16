@@ -14,6 +14,10 @@ using LinqToDB;
 using LinqToDB.DataProvider;
 using System.Linq;
 using Newtonsoft.Json;
+using MongoDB.Driver;
+using System.Collections;
+using Business.Data;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace UnitTest
 {
@@ -29,8 +33,11 @@ namespace UnitTest
 
     public class DataConnection : Business.Data.LinqToDBConnection<Entitys>
     {
-        readonly static IDataProvider provider = new LinqToDB.DataProvider.MySql.MySqlDataProvider();
-        readonly static string conString = "server=192.168.0.110;uid=test;pwd=123456;database=test";
+        //readonly static IDataProvider provider = new LinqToDB.DataProvider.MySql.MySqlDataProvider();
+        //readonly static string conString = "server=192.168.0.110;uid=test;pwd=123456;database=test";
+
+        readonly static IDataProvider provider = new LinqToDB.DataProvider.SqlServer.SqlServerDataProvider(System.String.Empty, LinqToDB.DataProvider.SqlServer.SqlServerVersion.v2008);
+        readonly static string conString = "Server=localhost;User Id=sa;Password=123456;Database=BusinessLib;";
 
         public DataConnection()
             : base(provider, conString) { }
@@ -44,8 +51,7 @@ namespace UnitTest
     public class Entitys : Business.Data.Entitys
     {
         readonly IDataContext con;
-        public Entitys(IDataContext con)
-        { this.con = con; }
+        public Entitys(IDataContext con) { this.con = con; }
 
         public IQueryable<songs> songs { get { return Get<songs>(); } }
 
@@ -58,13 +64,32 @@ namespace UnitTest
     #region Entitys
 
     [Table(Name = "songs")]
-    public class songs : Business.Entity.EntityBase
+    public class songs : EntityBase
     {
         [Column(Name = "songs_name"), NotNull]
         public string songs_name { get; set; }
 
         [Column(Name = "songs_passwd"), NotNull]
         public string songs_passwd { get; set; }
+    }
+
+    [BsonIgnoreExtraElements]
+    [ProtoBuf.ProtoContract(SkipConstructor = true)]
+    public class EntityBase : Business.Data.EntityBase
+    {
+        System.String _gid = System.Guid.NewGuid().ToString("N");
+        [ProtoBuf.ProtoMember(1)]
+        [PrimaryKey, Column(Name = "gid"), NotNull]
+        public System.String gid { get { return this._gid; } set { this._gid = value; } }
+
+        System.DateTime _dtt = System.DateTime.Now;
+        [ProtoBuf.ProtoMember(2)]
+        [Column(Name = "dtt")]
+        public System.DateTime dtt { get { return this._dtt; } set { this._dtt = value; } }
+
+        [ProtoBuf.ProtoMember(3)]
+        [Column(Name = "hide")]
+        public System.Boolean hide { get; set; }
     }
 
     #endregion
@@ -76,6 +101,7 @@ namespace UnitTest
     public static class Common
     {
         public static Data OnlyData = new Data();
+        public static Data1 OnlyData1 = new Data1();
 
         public static Business.Cache.CacheBase OnlyCache = new Business.Cache.CacheBase();
 
@@ -196,10 +222,10 @@ namespace UnitTest
     }
 
     //[BusinessLog(true)]
-    public class BusinessMember : BusinessBase<Data, Business.Log.NLogAdapter, Business.Cache.ICache>
+    public class BusinessMember : BusinessBase<Data1, Business.Log.NLogAdapter, Business.Cache.ICache>
     {
         public BusinessMember()
-            : base(Common.OnlyData, Common.OnlyLog, Common.OnlyCache, () =>
+            : base(Common.OnlyData1, Common.OnlyLog, Common.OnlyCache, () =>
             { })
         {
             this.WriteLogAsync = x =>
@@ -308,6 +334,7 @@ namespace UnitTest
                 con.Commit();
             }
             */
+
             //cache
             this.Cache.Set("222", "333");
             this.Cache.Set("2qw", "333");
@@ -446,6 +473,7 @@ namespace UnitTest
                 con.Commit();
             }
             */
+
             //cache
             this.Cache.Set("222", "333");
             this.Cache.Set("2qw", "333");
@@ -540,7 +568,7 @@ namespace UnitTest
             var token = GetToken();
 
             var ps = Parameter();
-            
+
             var startTime = new System.Diagnostics.Stopwatch();
             startTime.Start();
 

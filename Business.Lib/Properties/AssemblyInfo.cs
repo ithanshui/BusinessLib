@@ -16,5 +16,5 @@ using System.Runtime.InteropServices;
 [assembly: Guid("34c5a86e-57e9-49ae-b0f9-ae509a7e9ce1")]
 [assembly: System.Runtime.CompilerServices.SuppressIldasm]
 
-[assembly: AssemblyVersion("0.0.8")]
-[assembly: AssemblyFileVersion("0.0.8")]
+[assembly: AssemblyVersion("0.0.9")]
+[assembly: AssemblyFileVersion("0.0.9")]

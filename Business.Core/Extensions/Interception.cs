@@ -80,7 +80,7 @@ namespace Business.Extensions
             var list = new System.Collections.Generic.List<System.Reflection.MethodInfo>();
             foreach (var item in methods)
             {
-                var notInterceptAttrs = GetAttributes<Attributes.NotInterceptAttribute>(item);
+                var notInterceptAttrs = item.GetAttributes<Attributes.NotInterceptAttribute>();
                 if (0 < notInterceptAttrs.Length || (!typeof(void).Equals(item.ReturnType) && !typeof(Result.IResult).Equals(item.ReturnType)))
                 {
                     notList.Add(item);
@@ -96,7 +96,7 @@ namespace Business.Extensions
         static Attributes.BusinessLogAttribute LogAttr(System.Reflection.ICustomAttributeProvider member)
         {
             Attributes.BusinessLogAttribute logAttr;
-            var logAttrs = GetAttributes<Attributes.BusinessLogAttribute>(member);
+            var logAttrs = member.GetAttributes<Attributes.BusinessLogAttribute>();
             logAttr = 0 < logAttrs.Length ? logAttrs[0] : new Attributes.BusinessLogAttribute();
             return logAttr;
         }
@@ -104,7 +104,7 @@ namespace Business.Extensions
         static Attributes.CommandAttribute CmdAttr(System.Reflection.ICustomAttributeProvider member, string name)
         {
             Attributes.CommandAttribute commandAttr = null;
-            var commandAttrs = GetAttributes<Attributes.CommandAttribute>(member);
+            var commandAttrs = member.GetAttributes<Attributes.CommandAttribute>();
             commandAttr = 0 < commandAttrs.Length ? commandAttrs[0] : new Attributes.CommandAttribute(name);
             if (System.String.IsNullOrEmpty(commandAttr.OnlyName)) { commandAttr.OnlyName = name; }
             return commandAttr;
@@ -173,20 +173,6 @@ namespace Business.Extensions
 
         #endregion
 
-        /// <summary>
-        ///   Gets the attributes.
-        /// </summary>
-        /// <param name = "member">The member.</param>
-        /// <returns>The member attributes.</returns>
-        static T[] GetAttributes<T>(System.Reflection.ICustomAttributeProvider member, bool inherit = true) where T : class
-        {
-            if (typeof(T) != typeof(object))
-            {
-                return (T[])member.GetCustomAttributes(typeof(T), inherit);
-            }
-            return (T[])member.GetCustomAttributes(inherit);
-        }
-
         internal static System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData> GetInterceptorMetaData(System.Reflection.MethodInfo[] methods)
         {
             var interceptorMetaData = new System.Collections.Concurrent.ConcurrentDictionary<string, InterceptorMetaData>();
@@ -202,12 +188,12 @@ namespace Business.Extensions
                 System.Type agsType = null;
                 for (int i2 = 0; i2 < agsTypes.Length; i2++)
                 {
-                    var argumentsAttrs = GetAttributes<Attributes.ArgumentsAttribute>(agsTypes[i2]);
+                    var argumentsAttrs = agsTypes[i2].GetAttributes<Attributes.ArgumentsAttribute>();
                     if (0 < argumentsAttrs.Length)
                     {
                         i = i2; agsType = agsTypes[i2]; attr = argumentsAttrs[0];
 
-                        var deserializeAttrs = GetAttributes<Attributes.DeserializeAttribute>(agsTypes[i2]);
+                        var deserializeAttrs = agsTypes[i2].GetAttributes<Attributes.DeserializeAttribute>();
                         if (0 < deserializeAttrs.Length) { deserialize = deserializeAttrs[0]; }
                     }
                 }
@@ -224,7 +210,7 @@ namespace Business.Extensions
                     var fields = agsTypes[i].GetFields();
                     foreach (var field in fields)
                     {
-                        var atts = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(GetAttributes<Attributes.ArgumentAttribute>(field));
+                        var atts = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(field.GetAttributes<Attributes.ArgumentAttribute>());
 
                         var checkedAtts1 = new System.Collections.Generic.List<Attributes.CheckedAttribute>();
                         var atts1 = new System.Collections.Generic.List<Attributes.ArgumentAttribute>();
@@ -242,7 +228,7 @@ namespace Business.Extensions
                     var propertys = agsTypes[i].GetProperties();
                     foreach (var property in propertys)
                     {
-                        var atts = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(GetAttributes<Attributes.ArgumentAttribute>(property));
+                        var atts = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(property.GetAttributes<Attributes.ArgumentAttribute>());
 
                         var checkedAtts1 = new System.Collections.Generic.List<Attributes.CheckedAttribute>();
                         var atts1 = new System.Collections.Generic.List<Attributes.ArgumentAttribute>();

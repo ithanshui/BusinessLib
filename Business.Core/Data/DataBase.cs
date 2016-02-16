@@ -126,7 +126,7 @@ namespace Business.Data
 
         public static int ExecuteNonQuery(this IConnection connection, string commandText, System.Data.CommandType commandType = System.Data.CommandType.Text, params DataParameter[] parameter)
         {
-            return connection.Execute((obj) =>
+            return connection.Execute(() =>
             {
                 using (var cmd = connection.GetCommand(commandText, connection.Transaction, commandType, parameter))
                 {
@@ -137,7 +137,7 @@ namespace Business.Data
 
         public static T ExecuteScalar<T>(this IConnection connection, string commandText, System.Data.CommandType commandType = System.Data.CommandType.Text, params DataParameter[] parameter)
         {
-            return connection.Execute<T>((obj) =>
+            return connection.Execute<T>(() =>
             {
                 using (var cmd = connection.GetCommand(commandText, connection.Transaction, commandType, parameter))
                 {
@@ -146,49 +146,27 @@ namespace Business.Data
             }, minusOneExcep: false);
         }
 
-        public static T Execute<T>(this IConnection connection, System.Func<object, T> func, System.Collections.IEnumerable obj = null, bool minusOneExcep = true)
+        public static Result Execute<Result>(this IConnection connection, System.Func<Result> func, bool minusOneExcep = true)
         {
             bool isCreateTransaction = false;
             if (null == connection.Transaction) { connection.BeginTransaction(); isCreateTransaction = !isCreateTransaction; }
 
             try
             {
-                if (null != obj)
+                var result = func.Invoke();
+
+                if (minusOneExcep && typeof(Result).Equals(typeof(System.Int32)))
                 {
-                    var count = 0;
-
-                    foreach (var item in obj)
+                    var count = System.Convert.ToInt32(result);
+                    if (-1 == count)
                     {
-                        var result = func.Invoke(item);
-                        var i = System.Convert.ToInt32(result);
-                        if (-1 == i)
-                        {
-                            connection.Rollback();
-                            throw new System.Exception("Affected the number of records -1");
-                        }
-                        count += i;
+                        connection.Rollback();
+                        throw new System.Exception("Affected the number of records -1");
                     }
-
-                    if (isCreateTransaction) { connection.Commit(); }
-                    return (T)System.Convert.ChangeType(count, typeof(T));
                 }
-                else
-                {
-                    var result = func.Invoke(obj);
 
-                    if (minusOneExcep && typeof(T).Equals(typeof(System.Int32)))
-                    {
-                        var count = System.Convert.ToInt32(result);
-                        if (-1 == count)
-                        {
-                            connection.Rollback();
-                            throw new System.Exception("Affected the number of records -1");
-                        }
-                    }
-
-                    if (isCreateTransaction) { connection.Commit(); }
-                    return (T)System.Convert.ChangeType(result, typeof(T));
-                }
+                if (isCreateTransaction) { connection.Commit(); }
+                return result;
             }
             catch (System.Exception ex) { if (null != connection.Transaction) { connection.Rollback(); } throw ex; }
             finally { if (isCreateTransaction && null != connection.Transaction) { connection.Transaction.Dispose(); } }
@@ -243,44 +221,44 @@ namespace Business.Data
             using (var con = getConnection.Invoke()) { return func.Invoke(con); }
         }
 
-        public int Save<T>(System.Collections.IEnumerable obj)
+        public int Save<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.Save<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.Save(obj); });
         }
 
         public int Save<T>(T obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.Save<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.Save(obj); });
         }
 
-        public int SaveOrUpdate<T>(System.Collections.IEnumerable obj)
+        public int SaveOrUpdate<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.SaveOrUpdate<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.SaveOrUpdate(obj); });
         }
 
         public int SaveOrUpdate<T>(T obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.SaveOrUpdate<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.SaveOrUpdate(obj); });
         }
 
-        public int Update<T>(System.Collections.IEnumerable obj)
+        public int Update<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.Update<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.Update(obj); });
         }
 
         public int Update<T>(T obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.Update<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.Update(obj); });
         }
 
-        public int Delete<T>(System.Collections.IEnumerable obj)
+        public int Delete<T>(System.Collections.Generic.IEnumerable<T> obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.Delete<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.Delete(obj); });
         }
 
         public int Delete<T>(T obj)
         {
-            return UseConnection<int>(GetConnection, (con) => { return con.Delete<T>(obj); });
+            return UseConnection<int>(GetConnection, (con) => { return con.Delete(obj); });
         }
 
         public int ExecuteNonQuery(string commandText, System.Data.CommandType commandType = System.Data.CommandType.Text, params DataParameter[] parameter)

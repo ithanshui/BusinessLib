@@ -51,7 +51,7 @@ namespace SocketTest
 
         static void m_WebSocketServer_NewSessionConnected(SuperSocket.WebSocket.WebSocketSession session)
         {
-            session.TrySend(session.SessionID + " Connected");
+            //session.TrySend(session.SessionID + " Connected");
         }
 
         static void m_WebSocketServer_NewDataReceived(SuperSocket.WebSocket.WebSocketSession session, byte[] value)
