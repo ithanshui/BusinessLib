@@ -33,7 +33,7 @@ namespace Business.Log
 
         public void Debug(string format, params object[] args)
         {
-            if (log.IsDebugEnabled) { log.Debug(string.Format(format, args)); }
+            if (log.IsDebugEnabled) { log.DebugFormat(format, args); }
         }
 
         public void Info(string message)
@@ -43,7 +43,7 @@ namespace Business.Log
 
         public void Info(string format, params object[] args)
         {
-            if (log.IsInfoEnabled) { log.Info(string.Format(format, args)); }
+            if (log.IsInfoEnabled) { log.InfoFormat(format, args); }
         }
 
         public void Warn(string message)
@@ -53,7 +53,7 @@ namespace Business.Log
 
         public void Warn(string format, params object[] args)
         {
-            if (log.IsWarnEnabled) { log.Warn(string.Format(format, args)); }
+            if (log.IsWarnEnabled) { log.WarnFormat(format, args); }
         }
 
         public void Error(string message)
@@ -63,7 +63,7 @@ namespace Business.Log
 
         public void Error(string format, params object[] args)
         {
-            if (log.IsErrorEnabled) { log.Error(string.Format(format, args)); }
+            if (log.IsErrorEnabled) { log.ErrorFormat(format, args); }
         }
 
         public void Fatal(string message)
@@ -73,7 +73,7 @@ namespace Business.Log
 
         public void Fatal(string format, params object[] args)
         {
-            if (log.IsFatalEnabled) { log.Fatal(string.Format(format, args)); }
+            if (log.IsFatalEnabled) { log.FatalFormat(format, args); }
         }
     }
 }
